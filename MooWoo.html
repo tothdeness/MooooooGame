@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="hu"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Muu-vadászat 3D</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#e6f4dc;--fg:#1d2b1a;--pn:#fffffff2;--ac:#2f8f3a;--bd:#0002}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16241a;--fg:#e8f3e4;--pn:#1f3324f2;--ac:#3fa84c;--bd:#fff2}}
+:root[data-theme="dark"]{--bg:#16241a;--fg:#e8f3e4;--pn:#1f3324f2;--ac:#3fa84c;--bd:#fff2}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{font:15px system-ui,sans-serif;background:var(--bg);color:var(--fg);overflow:hidden}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+[hidden]{display:none!important}
+.scr{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;background:#0003;overflow:auto}
+.p{background:var(--pn);border:1px solid var(--bd);border-radius:16px;padding:18px;max-width:440px;width:100%;display:flex;flex-direction:column;gap:10px;margin:auto}
+h1,h2,p{margin:0}p,small{opacity:.8;font-size:13px}
+input,textarea,button{font:inherit;padding:9px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--fg)}
+textarea{height:60px;font-size:11px;resize:none;word-break:break-all}
+button{background:var(--ac);color:#fff;border:0;cursor:pointer;font-weight:600}button:disabled{opacity:.4}
+#an{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ab{background:var(--bg);color:var(--fg);border:2px solid transparent;font-size:24px;line-height:1.2;padding:6px 2px}.ab small{font-size:11px;display:block}.ab.on{border-color:var(--ac)}
+#hud{position:fixed;inset:0;pointer-events:none}
+#hud>div{position:absolute;background:var(--pn);border-radius:12px;padding:8px 12px}
+#tp{top:calc(8px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);max-width:94%;text-align:center}
+#cl{top:26%;left:50%;transform:translateX(-50%);font-size:44px;font-weight:800;color:var(--ac)}
+#ph{top:40%;left:50%;transform:translateX(-50%);font-size:20px;text-align:center}
+#sb{top:calc(64px + env(safe-area-inset-top,0px));right:8px;font-size:13px;min-width:130px}#sb .me{font-weight:700}
+#mc{bottom:calc(8px + env(safe-area-inset-bottom,0px));left:8px;width:190px;font-size:12px;pointer-events:auto}
+#mb{height:8px;background:var(--bd);border-radius:4px;overflow:hidden;margin:4px 0}#mv{height:100%;width:0;background:var(--ac)}
+#ts{position:fixed;bottom:22%;left:50%;transform:translateX(-50%);background:var(--pn);padding:10px 16px;border-radius:12px;z-index:9;max-width:90%;text-align:center}
+.ab.ok{border-color:var(--ac)}#zv{position:fixed;inset:0;pointer-events:none;z-index:5;background:radial-gradient(circle at 50% 50%,transparent 26vmin,#000 27vmin)}#vb{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}#hud>#xh{top:50%;left:50%;transform:translate(-50%,-50%);background:none;font-size:28px;font-weight:700;color:#fff;text-shadow:0 0 3px #000;padding:0}
+#hb{position:fixed;bottom:calc(8px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);display:flex;gap:4px;padding:4px;background:#0008;border:2px solid #000b;border-radius:6px;pointer-events:none;z-index:6}
+#hb div{width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:28px;background:#8b8b8b66;border:3px solid #373737;position:relative;color:#fff}
+#hb div.on{border-color:#fff;background:#ffffff40}#hb b{position:absolute;top:0;left:3px;font-size:11px;opacity:.8}
+</style></head><body>
+<canvas id="c"></canvas>
+<div id="menu" class="scr"><div class="p">
+<h1>🐄 Muu-vadászat 3D</h1>
+<p>Bújj a gépi állatok közé! Utánozd az állatod hangját a mikrofonba – ha 10–20 mp-ig hallgatsz, az állatod 5-ször megpördül, és lebuksz. Vadászként találd meg az igazi játékosokat – de a gépi állat elkapása büntet.</p>
+<input id="nm" placeholder="Neved" maxlength="12">
+<div id="an"></div>
+<small>🎙 Az élő hangchat mindig be van kapcsolva (szerveres és kézi kódos szobában is).</small>
+<button id="bh">Szoba létrehozása</button>
+<button id="bhm" style="background:var(--bg);color:var(--fg)">Szoba létrehozása szerver nélkül (kézi kód)</button>
+<button id="bj" style="background:var(--bg);color:var(--fg)">Csatlakozás szobához</button>
+<div id="jp" hidden style="display:flex;flex-direction:column;gap:8px"><small>Szobakód vagy a teljes meghívó link:</small><input id="oc" maxlength="120" placeholder="pl. K7M2Q" style="text-transform:uppercase"><button id="bg">Csatlakozás</button></div>
+<details id="km"><summary style="cursor:pointer;font-size:13px">🔌 Kézi csatlakozás (szerver nélkül)</summary><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px"><small>1. Illeszd be a házigazda kódját:</small><textarea id="kj"></textarea><button id="kg">Válasz generálása</button><small>2. Másold ezt a választ, és küldd el a házigazdának:</small><textarea id="ka" readonly onclick="this.select()"></textarea></div></details>
+<small>Fejhallgatót ajánlunk. M (nyomva tartva) = a mikrofonodba mondottat hallják élőben; mikrofon nélkül az M csak jelzi, hogy hangot adtál ki.</small>
+</div></div>
+<div id="lobby" class="scr" hidden><div class="p">
+<h2>Váró <span id="cnt"></span></h2><div id="pl"></div>
+<div><small>🎙 Vedd fel a saját hangodat mind a 4 állathoz (1,6 mp, kattintás után azonnal szólj, fejhallgatóval). A gépi állatok a játékosok felvett hangját használják, így nem különböztethetők meg. Aki nem vesz fel hangot, annak gépi hangja lesz – az elárulja!</small><div id="vb"></div></div>
+<div id="hc" style="display:flex;flex-direction:column;gap:8px">
+<div id="kl" style="display:flex;flex-direction:column;gap:8px"><small>Szobakód – a barátaid a menüben a „Csatlakozás szobához” gombbal ezt adhatják meg:</small><div style="display:flex;gap:8px;align-items:center"><b id="rc" style="font-size:28px;letter-spacing:4px;flex:1"></b><button id="bk">📋 Kód másolása</button></div><small>…vagy küldd el nekik a meghívó linket:</small><input id="lk" readonly onclick="this.select()"><small id="fw" hidden style="color:#d9534f">⚠ A játék helyi fájlból fut, ezért a link csak nálad működik. Tedd fel https-es tárhelyre (pl. GitHub Pages, Netlify), és onnan nyisd meg.</small><button id="bi">🔗 Link másolása</button></div>
+<details id="kd"><summary style="cursor:pointer;font-size:13px">🔌 Játékos meghívása kézi kóddal (szerver nélkül)</summary><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px"><button id="ki">+ Játékos meghívása</button><small>Küldd el ezt a kódot a játékosnak:</small><textarea id="ko" readonly onclick="this.select()"></textarea><small>Illeszd be a játékos válaszkódját:</small><textarea id="kh"></textarea><button id="kc">Összekapcsolás</button></div></details>
+<button id="bs">Játék indítása (min. 2 játékos)</button></div>
+<small>Mozgás: WASD · Nézelődés: egér (kattints a pályára; Esc = kurzor vissza) vagy Q/E · V: FPS / külső nézet · Állatként: 10–20 mp-enként szólalj meg a mikrofonba (M nyomva tartva = élő mikrofon), különben az állatod 5-ször megpördül és lebuksz · 1–5: eszköztár (vadász: 1 = kard, 2 = távcső), bal klikk = használat · mindenki állandóan hangchatben van · Vadász: távcső (2-es slot) + bal klikk vagy Z/Shift = nagyítás, görgő = zoom (csak a célzott, lilával kijelölt állat hangját hallod), jobb klikk = jelölés, ugyanarra újra jobb klikk = jelölés visszavonása · A hangot adó állat fölött 🔊 jelzés látszik · Tab: másik játékos nézése (kiesés után) · Vadász: kard + bal klikk / Szóköz = elkapás, a hangokat csak ~7 méterről hallod.</small>
+</div></div>
+<div id="hud" hidden>
+<div id="tp"></div><div id="xh" hidden>+</div><div id="ph"></div><div id="sb"></div>
+<div id="mc">🎤 Mikrofon<div id="mb"><div id="mv"></div></div>Érzékenység<input id="th" type="range" min=".02" max=".3" step=".01" value=".08" style="width:100%;padding:0"></div>
+</div>
+<div id="ov" class="scr" hidden><div class="p"><h2 id="ot"></h2><p id="om"></p><div id="os"></div><button id="bn" hidden>Vissza a váróba</button></div></div>
+<div id="hb" hidden></div><div id="zv" hidden></div><div id="ts" hidden></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+const $=i=>document.getElementById(i),R=Math.random,sh=(i,o)=>$(i).hidden=!o,esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const AN={cow:'🐄',chicken:'🐔',pig:'🐖',sheep:'🐑'},NM={cow:'Tehén',chicken:'Csirke',pig:'Disznó',sheep:'Juh'};
+let me={id:0,name:'',an:'cow',x:0,z:0,r:0},isHost=false,peers={},hdc=null,L=[],S=null,sq=-1,pend=null,nid=1,G={ph:'lobby',P:{}},keys={},AC,ana,buf,mooCd=0,tT=0,pt=0,pm={},am={},msrc,SM={},tz={},VB={},RB={},rcg=0,lc=0,zr=0,cy=0,cp=0,fp=0,spT=-1,lx=0,lz=0,hl=0,zm=0,zt=null,cys=0,cps=0,cfgV=0,vq={},slot=0,swT=0,scopeOn=0,zw=.6,hbk='';
+const send=(d,m)=>d&&d.readyState=='open'&&d.send(JSON.stringify(m)),bc=m=>{const s=JSON.stringify(m);for(const d of Object.values(peers))d.readyState=='open'&&d.send(s)};
+const enc=o=>btoa(JSON.stringify(o)),dec=s=>JSON.parse(atob(s.trim())),clamp=v=>Math.max(-31,Math.min(31,v));
+const gather=pc=>new Promise(r=>{if(pc.iceGatheringState=='complete')return r();pc.onicegatheringstatechange=()=>pc.iceGatheringState=='complete'&&r();setTimeout(r,4000)});
+const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:global.stun.twilio.com:3478'},{urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'}]};
+function toast(m){const t=$('ts');t.textContent=m;t.hidden=false;clearTimeout(tT);tT=setTimeout(()=>t.hidden=true,3200)}
+/* ---------- audio ---------- */
+const ctx=()=>{AC=AC||new(window.AudioContext||window.webkitAudioContext)();AC.resume();return AC};
+const SN={cow:[150,90,'sawtooth',1.1,5,1],pig:[320,170,'sawtooth',.35,30,2],chicken:[900,600,'square',.09,0,4],sheep:[380,300,'sawtooth',.9,28,1]};
+function snd(a,x,z,vo,w,ai){if(w===me.id)return;const c=ctx(),d=Math.hypot(x-lx,z-lz),v0=aud(x,z,w==null?1:0,w==null?ai:w);if(v0<=0)return;const b=SM[vo]&&SM[vo][a];
+if(b){const s=c.createBufferSource(),g=c.createGain(),p=c.createStereoPanner?c.createStereoPanner():null;s.buffer=b;g.gain.value=v0*(b.g||.8);s.connect(g);if(p){p.pan.value=Math.max(-1,Math.min(1,((z-lz)*Math.sin(cy)-(x-lx)*Math.cos(cy))/Math.max(1,d)));g.connect(p);p.connect(c.destination)}else g.connect(c.destination);s.start();return}
+const [f0,f1,ty,du,vb,n]=SN[a],v=v0*.25;
+for(let i=0;i<n;i++){const t=c.currentTime+i*(du+.06),o=c.createOscillator(),g=c.createGain(),f=c.createBiquadFilter();o.type=ty;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+du);f.type='lowpass';f.frequency.value=1200;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.04);g.gain.linearRampToValueAtTime(0,t+du);
+if(vb){const l=c.createOscillator(),lg=c.createGain();l.frequency.value=vb;lg.gain.value=f0*.08;l.connect(lg);lg.connect(o.frequency);l.start(t);l.stop(t+du)}
+o.connect(f);f.connect(g);g.connect(c.destination);o.start(t);o.stop(t+du+.05)}}
+function beep(){const c=ctx(),o=c.createOscillator(),g=c.createGain();o.frequency.value=880;g.gain.value=.12;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.15)}
+async function startMic(){const c=ctx();try{const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});mst=st;ana=c.createAnalyser();ana.fftSize=512;msrc=c.createMediaStreamSource(st);msrc.connect(ana);buf=new Uint8Array(512)}catch(e){toast('Nincs mikrofon – az M billentyű helyettesíti')}}
+function doMoo(f){const t=performance.now();if(t<mooCd||!S||S.hu==me.id||(S.ph!='play'&&S.ph!='hide'))return;
+
+mooCd=t+1500;isHost?hmoo(0):send(hdc,{t:'moo'})}
+function catchIt(){if(!S||S.hu!=me.id||S.ph!='play')return;isHost?hcatch(0,cy):send(hdc,{t:'c',r:cy})}
+/* ---------- hangfelvétel ---------- */
+const PR={cow:'Muuu!',chicken:'Kot-kot!',pig:'Röff-röff!',sheep:'Bééé!'};
+$('vb').innerHTML=Object.keys(AN).map(k=>`<button class="ab" data-k="${k}">${AN[k]}<small>${NM[k]}</small></button>`).join('');
+$('vb').onclick=e=>{const b=e.target.closest('button');if(b)rec(b.dataset.k)};
+const zc=(d,sr)=>{let pk=0,n=0,c=0,p=0;for(const v of d)pk=Math.max(pk,Math.abs(v));for(const v of d)if(Math.abs(v)>pk*.3){n++;if(p&&(v>0)!=(p>0))c++;p=v}return n>10?c/(n/sr):0};
+const sendv=(d,p,a,b)=>{const n=Math.ceil(b.length/12000);for(let i=0;i<n;i++)send(d,{t:'v',p,a,i,n,d:b.slice(i*12000,(i+1)*12000)})};
+function rv(k,m,f){const r=RB[k]=RB[k]||[];r[m.i]=m.d;if(r.filter(Boolean).length==m.n){delete RB[k];f(r.join(''))}}
+async function sv(p,a,b){try{const c=ctx(),u=Uint8Array.from(atob(b),q=>q.charCodeAt(0)),bf=await c.decodeAudioData(u.buffer),d=bf.getChannelData(0);let pk=.001;for(const v of d)pk=Math.max(pk,Math.abs(v));bf.g=Math.min(4,.8/pk);(SM[p]=SM[p]||{})[a]=bf;if(p==me.id){const e=document.querySelector(`#vb [data-k=${a}]`);e&&e.classList.add('ok')}}catch(e){toast('Hibás hangfelvétel')}}
+function vclip(p,a,b,ex){(VB[p]=VB[p]||{})[a]=b;sv(p,a,b);for(const i in peers)if(i!=ex)sendv(peers[i],p,a,b);L.forEach(q=>q.v=Object.keys(VB[q.id]||{}).length);bc({t:'lobby',L});rl()}
+function rec(a){if(rcg)return;if(!mst)return toast('Nincs mikrofon – a felvételhez kell');if(!window.MediaRecorder)return toast('A böngésződ nem támogatja a felvételt');
+const tr=mst.getAudioTracks()[0].clone(),mt=['audio/webm;codecs=opus','audio/mp4'].find(t=>MediaRecorder.isTypeSupported(t)),mr=new MediaRecorder(new MediaStream([tr]),mt?{mimeType:mt,audioBitsPerSecond:64000}:{}),ch=[];rcg=1;toast('🎙 Most mondd: '+PR[a]+' (1,6 mp)');
+mr.ondataavailable=e=>e.data.size&&ch.push(e.data);
+mr.onstop=async()=>{tr.stop();rcg=0;const ab=await new Blob(ch,{type:mr.mimeType}).arrayBuffer(),u=new Uint8Array(ab);let q='';for(let i=0;i<u.length;i+=8000)q+=String.fromCharCode.apply(null,u.subarray(i,i+8000));const b=btoa(q);
+try{const d=(await ctx().decodeAudioData(ab.slice(0))).getChannelData(0);let pk=0;for(const v of d)pk=Math.max(pk,Math.abs(v));if(pk<.02)return toast('Túl halk, próbáld újra!')}catch(e){return toast('A felvétel nem sikerült')}
+isHost?vclip(0,a,b,-1):(sv(me.id,a,b),sendv(hdc,0,a,b));toast('✓ Felvéve: '+NM[a])};mr.start();setTimeout(()=>mr.stop(),1700)}
+/* ---------- menü / szoba ---------- */
+$('an').innerHTML=Object.keys(AN).map(k=>`<button class="ab${k=='cow'?' on':''}" data-k="${k}">${AN[k]}<small>${NM[k]}</small></button>`).join('');
+$('an').onclick=e=>{const b=e.target.closest('button');if(!b)return;me.an=b.dataset.k;document.querySelectorAll('.ab').forEach(x=>x.classList.toggle('on',x==b))};
+const prep=()=>{me.name=($('nm').value.trim()||'Játékos'+(10+R()*89|0)).slice(0,12)};
+function rl(){$('pl').innerHTML=L.map(p=>`<div>${AN[p.an]} ${esc(p.name)}${p.id==0?' 👑':''} <small>🎙 ${p.v||0}/4</small></div>`).join('');$('hc').hidden=!isHost;$('bs').disabled=L.length<2;$('cnt').textContent=L.length+'/8';vcSync()}
+let pe,mst,vho=0,hlm=null;const vcC={},VG={},OP=s=>s.replace('useinbandfec=1','useinbandfec=1;stereo=0;maxaveragebitrate=64000');
+const wrap=c=>{const w={get readyState(){return c.open?'open':'connecting'},send:s=>c.send(s),onopen:0,onmessage:0,onclose:0};c.on('open',()=>w.onopen&&w.onopen());c.on('data',d=>w.onmessage&&w.onmessage({data:d}));c.on('close',()=>w.onclose&&w.onclose());c.on('error',()=>w.onclose&&w.onclose());return w};
+function mkRoom(){const code=Array.from({length:5},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[R()*32|0]).join('');pe=new Peer('muu-'+code,{config:ICE});
+pe.on('error',e=>{if(e.type=='unavailable-id')mkRoom();else{$('bh').disabled=false;toast(/network|socket|server/.test(e.type)?'A párosító szerver nem érhető el – ellenőrizd a netkapcsolatot':'Hálózati hiba: '+e.type)}});pe.on('disconnected',()=>pe.reconnect());pe.on('connection',c=>hdcSetup(wrap(c)));pe.on('call',vcAns);
+pe.on('open',()=>{L[0].pid=pe.id;$('rc').textContent=code;$('lk').value=location.href.split(/[?#]/)[0]+'#'+code;sh('fw',location.protocol=='file:');sh('menu',0);sh('lobby',1);rl()})}
+$('bh').onclick=async()=>{prep();await startMic();cfgV=1;isHost=true;me.id=0;L=[{id:0,name:me.name,an:me.an}];$('bh').disabled=true;mkRoom();startTick()};
+const startTick=()=>{try{const w=new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(0),50)'])));w.onmessage=tick}catch(e){setInterval(tick,50)}};
+$('bhm').onclick=async()=>{prep();await startMic();cfgV=1;isHost=true;me.id=0;L=[{id:0,name:me.name,an:me.an}];sh('menu',0);sh('lobby',1);sh('kl',0);$('kd').open=true;rl();startTick()};
+$('ki').onclick=async()=>{if(L.length>=8)return toast('Tele a szoba');try{const pc=new RTCPeerConnection(ICE);pend=pc;const dst=ctx().createMediaStreamDestination();pc._dst=dst;pc.addTrack(dst.stream.getAudioTracks()[0],dst.stream);pc.ontrack=e=>{pc._st=e.streams[0]||new MediaStream([e.track]);if(pc._id!=null)mixSrc(pc._id,pc._st)};hdcSetup(pc.createDataChannel('g'),pc);$('ko').value='Generálás…';await pc.setLocalDescription(await pc.createOffer());await gather(pc);$('ko').value=enc(pc.localDescription)}catch(e){toast('Nem sikerült a meghívó kód létrehozása')}};
+$('kc').onclick=async()=>{try{await pend.setRemoteDescription(dec($('kh').value));$('kh').value='';$('ko').value=''}catch(e){toast('Érvénytelen kód')}};
+$('kg').onclick=async()=>{prep();$('kg').disabled=true;await startMic();try{const pc=new RTCPeerConnection(ICE);
+pc.ontrack=e=>{const a=new Audio();a.srcObject=e.streams[0]||new MediaStream([e.track]);a.play().catch(()=>0)};pc.ondatachannel=e=>{hdc=e.channel;hdc.onopen=()=>{send(hdc,{t:'hi',name:me.name,an:me.an,pid:''});sh('menu',0);sh('lobby',1);rl()};hdc.onmessage=e=>cm(JSON.parse(e.data));hdc.onclose=()=>toast('A kapcsolat megszakadt – frissítsd az oldalt')};
+await pc.setRemoteDescription(dec($('kj').value));if(mst)pc.addTrack(mst.getAudioTracks()[0],mst);await pc.setLocalDescription(await pc.createAnswer());$('ka').value='Generálás…';await gather(pc);$('ka').value=enc(pc.localDescription)}catch(e){$('kg').disabled=false;toast('Érvénytelen kód')}};
+$('bj').onclick=()=>{$('jp').hidden=false};
+$('bk').onclick=()=>{const c=$('rc').textContent;navigator.clipboard?navigator.clipboard.writeText(c).then(()=>toast('Kód másolva: '+c),()=>toast('Kód: '+c)):toast('Kód: '+c)};
+$('oc').oninput=()=>$('bg').textContent='Csatlakozás';$('oc').onkeydown=e=>e.key=='Enter'&&$('bg').click();
+$('bi').onclick=()=>{const l=$('lk').value;navigator.clipboard?navigator.clipboard.writeText(l).then(()=>toast('Link másolva!'),()=>$('lk').select()):$('lk').select()};
+$('bg').onclick=async()=>{prep();const code=$('oc').value.trim().split(/[#=\/]/).pop().toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length<4)return toast('Add meg a szobakódot');$('bg').disabled=true;await startMic();const to=setTimeout(()=>{if(!hdc||hdc.readyState!='open'){$('bg').disabled=false;toast('Nem sikerült csatlakozni (15 mp). Nyitva van a házigazda oldala? Próbáld újra.');try{pe.destroy()}catch(e){}hdc=null}},15000);pe=new Peer(undefined,{config:ICE});
+pe.on('error',e=>{clearTimeout(to);$('bg').disabled=false;toast(e.type=='peer-unavailable'?'Nincs ilyen szoba (vagy a házigazda kilépett)':/network|socket|server/.test(e.type)?'A párosító szerver nem érhető el – ellenőrizd a netkapcsolatot':'Hálózati hiba: '+e.type)});pe.on('call',vcAns);
+pe.on('open',()=>{hdc=wrap(pe.connect('muu-'+code,{serialization:'json',reliable:true}));hdc.onopen=()=>{clearTimeout(to);send(hdc,{t:'hi',name:me.name,an:me.an,pid:pe.id});sh('menu',0);sh('lobby',1);rl()};hdc.onmessage=e=>cm(JSON.parse(e.data));hdc.onclose=()=>toast('A kapcsolat megszakadt – frissítsd az oldalt')})};
+function hdcSetup(dc,pc){let id=null;
+dc.onmessage=e=>{const m=JSON.parse(e.data);if(m.t=='hi'&&id==null&&L.length<8&&G.ph=='lobby'){id=nid++;peers[id]=dc;if(pc){pc._id=id;mixAdd(id,pc)}L.push({id,name:String(m.name).slice(0,12),an:AN[m.an]?m.an:'cow',pid:String(m.pid||'')});send(dc,{t:'id',id,vc:cfgV});rl();bc({t:'lobby',L});for(const q in VB)for(const k in VB[q])sendv(dc,+q,k,VB[q][k])}else if(id!=null)hm(id,m);else if(m.t=='hi')send(dc,{t:'no'})};
+dc.onclose=()=>{if(id==null)return;delete peers[id];mixDel(id);L=L.filter(p=>p.id!=id);if(G.P[id]){G.P[id].alive=0;G.P[id].gone=1}if(G.ph=='lobby'){rl();bc({t:'lobby',L})}}}
+$('bs').onclick=()=>{G={ph:'x',P:{},A:[],order:L.map(p=>p.id),rd:0,nr:Math.min(L.length,4),seq:0};L.forEach(p=>G.P[p.id]={id:p.id,name:p.name,an:p.an,x:0,z:0,r:0,alive:1,flag:0,score:0,mooed:0,stun:0,cd:0});nextRound()};
+$('bn').onclick=()=>{G={ph:'lobby',P:{}};bc({t:'lobby',L});cm({t:'lobby',L})};
+function cm(m){if(m.t=='no'){toast('A szoba tele van, vagy már fut a játék');sh('lobby',0);sh('menu',1);$('bg').disabled=false}else if(m.t=='id'){me.id=m.id;cfgV=m.vc;}else if(m.t=='lobby'){L=m.L;S=null;sq=-1;clr();sh('hud',0);sh('hb',0);sh('ov',0);sh('menu',0);sh('lobby',1);rl()}else if(m.t=='s')ap(m);else if(m.t=='snd')snd(m.a,m.x,m.z,m.vo,m.w,m.ai);else if(m.t=='v')rv('v'+m.p+m.a,m,b=>sv(m.p,m.a,b));else if(m.t=='call')beep();else if(m.t=='ev')toast(m.m)}
+const tint=(m,c)=>m.traverse(o=>o.material&&o.material.emissive&&o.material.emissive.setHex(c));
+/* ---------- host: játéklogika ---------- */
+const rp=(m=0)=>{let x,z;do{x=(R()-.5)*56;z=(R()-.5)*56}while(Math.hypot(x,z)<m);return[x,z]};
+const snd2=(a,x,z,vo,w,ai)=>{bc({t:'snd',a,x,z,vo,w,ai});snd(a,x,z,vo,w,ai)},ev=m=>{bc({t:'ev',m});toast(m)};
+function nextRound(){G.rd++;{const o=G.order.filter(i=>!G.P[i].gone);G.hu=o[(G.rd-1)%o.length]}G.seq++;G.ph='hide';G.tm=5;G.call=0;G.nc=8;G.sec=0;G.msg='';G.mk=[];
+Object.values(G.P).forEach(p=>{p.alive=p.gone?0:1;p.nt=10+R()*10;p.call=0;p.spin=0;p.sw=0;p.mt=0;p.sl=0;p.sn=0;p.flag=0;p.stun=0;p.cd=0;if(p.id==G.hu){p.x=0;p.z=0}else{[p.x,p.z]=rp(8)}});
+const T=Object.keys(AN),vp=G.order.filter(i=>VB[i]&&Object.keys(VB[i]).length>3);G.A=[];for(let i=0;i<16;i++){const q=rp(6);G.A.push({x:q[0],z:q[1],r:0,an:T[i%4],vo:vp.length?vp[R()*vp.length|0]:-1,tx:q[0],tz:q[1],w:R()*2,st:0,sn:0,nt:2+R()*23})}}
+function hm(id,m){const p=G.P[id];if(m.t=='p'&&p&&isFinite(m.x+m.z+m.r)){p.x=clamp(m.x);p.z=clamp(m.z);p.r=m.r;p.sl=m.s>=0&&m.s<5?m.s|0:0;p.q=m.q}else if(m.t=='moo')hmoo(id);else if(m.t=='sw'){if(p&&id==G.hu)p.sw=.4}else if(m.t=='mk')hmk(id,m.k,m.i);else if(m.t=='c')hcatch(id,m.r);else if(m.t=='v'&&AN[m.a])rv('v'+id+m.a,m,b=>vclip(id,m.a,b,id))}
+function hmoo(id){const p=G.P[id];if(!p||!p.alive||id==G.hu||(G.ph!='play'&&G.ph!='hide'))return;p.nt=10+R()*10;if(p.mt>0)return;p.mt=4;p.sn=1.8;if(!cfgV)snd2(p.an,p.x,p.z,id,id)}
+function hcatch(id,ry){if(G.ph!='play'||id!=G.hu)return;const h=G.P[id];if(h.cd>0||h.stun>0)return;h.cd=.8;ry=isFinite(ry)?ry:h.r;const fc=(x,z)=>{const q=Math.atan2(x-h.x,z-h.z)-ry;return Math.abs(Math.atan2(Math.sin(q),Math.cos(q)))<.9};let best=null,bd=3.2;
+Object.values(G.P).forEach(p=>{if(p.id!=id&&p.alive){const d=Math.hypot(p.x-h.x,p.z-h.z);if(d<bd&&fc(p.x,p.z)){bd=d;best=p}}});
+G.A.forEach(a=>{if(a.st<=0){const d=Math.hypot(a.x-h.x,a.z-h.z);if(d<bd&&fc(a.x,a.z)){bd=d;best=a}}});if(!best)return;
+if(best.id!=null){best.alive=0;h.score+=100;ev('🎯 '+best.name+' elkapva! +100 a vadásznak')}else{best.st=3;h.score-=40;h.stun=2.5;ev('❌ Gépi állat volt! −40 pont és kábulat')}}
+function tick(){mixG();if(G.ph=='lobby')return;const dt=.05,P=Object.values(G.P),h0=G.P[0];if(h0&&sq==G.seq){h0.x=me.x;h0.z=me.z;h0.r=me.r;h0.sl=slot;h0.q=zm>.5?(zt?[zt.k,zt.i]:1):0}
+const hu=G.P[G.hu],hum=P.filter(p=>p.id!=G.hu&&p.alive);P.forEach(p=>{p.flag=Math.max(0,p.flag-dt);p.stun=Math.max(0,p.stun-dt);p.cd=Math.max(0,p.cd-dt);p.mc=Math.max(0,(p.mc||0)-dt);p.sn=Math.max(0,(p.sn||0)-dt);p.sw=Math.max(0,(p.sw||0)-dt);p.mt=Math.max(0,(p.mt||0)-dt)});G.mk=(G.mk||[]).map(q=>[q[0],q[1],q[2]-dt]).filter(q=>q[2]>0);
+if(G.ph=='hide'||G.ph=='play')G.A.forEach((a,ai)=>{a.st=Math.max(0,a.st-dt);a.sn=Math.max(0,a.sn-dt);if(a.st>0)return;if(a.w>0)a.w-=dt;else{const dx=a.tx-a.x,dz=a.tz-a.z,d=Math.hypot(dx,dz);if(d<.3){a.w=.5+R()*3;[a.tx,a.tz]=rp()}else{a.x+=dx/d*2.4*dt;a.z+=dz/d*2.4*dt;a.r=Math.atan2(dx,dz)}}if((a.nt-=dt)<=0){a.nt=15+R()*10;a.sn=1.8;snd2(a.an,a.x,a.z,a.vo,undefined,ai)}});
+if(G.ph=='hide'||G.ph=='play')hum.forEach(p=>{if(p.spin>0)p.spin-=dt;else if((p.nt-=dt)<=0){p.nt=10+R()*10;p.spin=2.5}});
+if(G.ph=='hide'){G.tm-=dt;if(G.tm<=0){G.ph='play';G.tm=75;G.nc=8}}
+else if(G.ph=='play'){G.tm-=dt;G.sec+=dt;if(G.sec>=1){G.sec=0;hum.forEach(p=>p.score++)}
+if(!hum.length||G.tm<=0||hu.gone){G.ph='end';G.tm=6;hum.forEach(p=>p.score+=20);G.msg=hum.length?'Az állatok túlélték! (+20 a túlélőknek)':'Minden állatot elkaptak!'}}
+else if(G.ph=='end'){G.tm-=dt;if(G.tm<=0){if(G.rd>=G.nr||P.filter(p=>!p.gone).length<2)G.ph='over';else nextRound()}}
+const f=n=>+n.toFixed(2),s={t:'s',ph:G.ph,rd:G.rd,nr:G.nr,tm:Math.ceil(G.tm),hu:G.hu,sq:G.seq,c:G.call>0?1:0,ca:G.ca,m:G.msg,
+P:P.map(p=>[p.id,f(p.x),f(p.z),f(p.r),p.alive,+p.flag.toFixed(1),p.score,p.an,p.name,+p.stun.toFixed(1),+(p.sn||0).toFixed(1),+(p.spin||0).toFixed(1),p.sl||0,+(p.sw||0).toFixed(2)]),M:(G.mk||[]).map(q=>[q[0],q[1]]),A:G.A.map(a=>[f(a.x),f(a.z),f(a.r),a.an,a.st>0?1:0,+a.sn.toFixed(1)])};bc(s);ap(s)}
+/* ---------- kézi szoba: host-keverő ---------- */
+const MX={S:{},D:{},G:{}};
+function mixAdd(id,pc){MX.D[id]=pc._dst;if(!MX.S[0]&&mst)mixSrc(0,mst);if(pc._st)mixSrc(id,pc._st);mixLink()}
+function mixSrc(id,st){const x=ctx();if(id){const a=new Audio();a.srcObject=st;a.muted=true;a.play().catch(()=>0)}const s=x.createMediaStreamSource(st);MX.S[id]=s;if(id){const g=x.createGain();s.connect(g);g.connect(x.destination);VG[id]=g}mixLink()}
+function mixLink(){const x=ctx();for(const y in MX.S)for(const d in MX.D)if(y!=d&&!MX.G[y+'_'+d]){const g=x.createGain();g.gain.value=0;MX.S[y].connect(g);g.connect(MX.D[d]);MX.G[y+'_'+d]=g}}
+function mixDel(id){delete VG[id];for(const k in MX.G){const[y,d]=k.split('_');if(y==id||d==id){try{MX.G[k].disconnect()}catch(e){}delete MX.G[k]}}try{MX.S[id]&&MX.S[id].disconnect()}catch(e){}delete MX.S[id];delete MX.D[id]}
+function audL(X,Y){const a=G.P[X],b=G.P[Y];if(!a||!b)return 0;if(X==G.hu&&a.q)return Array.isArray(a.q)&&a.q[0]==0&&a.q[1]==Y?1:0;return Math.max(0,1-Math.hypot(a.x-b.x,a.z-b.z)/(X==G.hu?7:35))}
+function mixG(){for(const k in MX.G){const[y,d]=k.split('_');MX.G[k].gain.value=G.ph=='lobby'?1:audL(+d,+y)}}
+/* ---------- élő chat, hallás, jelölés ---------- */
+const SIL=14;
+const aud=(x,z,k,i)=>{if(hl&&zm>.5)return zt&&zt.k==k&&zt.i==i?1:0;return Math.max(0,1-Math.hypot(x-lx,z-lz)/(hl?7:35))};
+function vcSync(){if(!cfgV||!mst||!pe||pe.destroyed)return;L.forEach(q=>{if(q.id!=me.id&&q.pid&&!vcC[q.id]&&me.id<q.id)vcAtt(pe.call(q.pid,mst,{sdpTransform:OP,metadata:{p:me.id}}),q.id)})}
+function vcAns(c){if(!cfgV||!mst)return;c.answer(mst,{sdpTransform:OP});vcAtt(c,c.metadata&&c.metadata.p)}
+function vcAtt(c,id){if(id==null)return;vcC[id]=c;c.on('stream',st=>{const a=new Audio();a.srcObject=st;a.muted=true;a.play().catch(()=>0);const x=ctx(),g=x.createGain();x.createMediaStreamSource(st).connect(g);g.connect(x.destination);VG[id]=g});c.on('close',()=>{delete vcC[id];delete VG[id]})}
+function hmk(id,k,i){if(G.ph!='play'||id!=G.hu||(k!=0&&k!=1)||!isFinite(i))return;const h=G.P[id];if(h.mc>0)return;if(k==0&&!(i!=id&&G.P[i]&&G.P[i].alive))return;if(k==1&&!G.A[i])return;h.mc=.6;const had=(G.mk||[]).some(q=>q[0]==k&&q[1]==i);G.mk=(G.mk||[]).filter(q=>!(q[0]==k&&q[1]==i));if(had)return;G.mk.push([k,i,15]);if(G.mk.length>4)G.mk.shift()}
+function markIt(){if(!S||S.hu!=me.id||S.ph!='play'||!zt)return;isHost?hmk(0,zt.k,zt.i):send(hdc,{t:'mk',k:zt.k,i:zt.i})}
+/* ---------- kliens: állapot + HUD ---------- */
+function ap(s){const e=s.P.find(p=>p[0]==me.id);
+if(!S||s.sq!=sq){sq=s.sq;clr();fp=s.hu==me.id?1:0;spT=-1;slot=0;scopeOn=0;swT=0;hbk='';if(e){me.x=e[1];me.z=e[2]}sh('lobby',0);sh('menu',0);sh('hud',1);document.activeElement&&document.activeElement.blur()}S=s;
+const mh=s.hu==me.id,al=e&&e[4];
+$('tp').textContent=`Kör ${s.rd}/${s.nr} · ⏱ ${s.tm}s · `+(mh?'🧑‍🌾 Te vagy a vadász · 1: kard, 2: távcső · bal klikk = használat, görgő = nagyítás':al?AN[me.an]+' Állat vagy · WASD · M (nyomva tartva) = élő hang':'Elkaptak – nézelődsz (Tab: játékosváltás, V: FPS)');
+sh('hb',!!al);hbR();$('ph').textContent=s.ph=='hide'?(mh?'Várj, az állatok szétszélednek… ':'Szélj szét és viselkedj állatként! ')+s.tm:'';
+const sb=[...s.P].sort((a,b)=>b[6]-a[6]).map(p=>`<div${p[0]==me.id?' class="me"':''}>${AN[p[7]]} ${esc(p[8])}${p[0]==s.hu?' 🧑‍🌾':''}${p[4]?'':' ✖'} <b>${p[6]}</b></div>`).join('');$('sb').innerHTML=sb;
+if((s.M||[]).some(q=>q[0]==0&&q[1]==me.id))$('tp').textContent+=' · 🚩 MEGJELÖLTEK!';const ov=s.ph=='end'||s.ph=='over';sh('ov',ov);if(ov&&document.pointerLockElement)document.exitPointerLock();if(ov){const w=[...s.P].sort((a,b)=>b[6]-a[6])[0];$('ot').textContent=s.ph=='over'?'🏆 Játék vége – győztes: '+w[8]:'Kör vége';$('om').textContent=s.m;$('os').innerHTML=sb;$('bn').hidden=!(isHost&&s.ph=='over')}}
+/* ---------- 3D ---------- */
+const cv=$('c'),rd=new THREE.WebGLRenderer({canvas:cv,antialias:true}),sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(55,1,.1,200),clock=new THREE.Clock();
+sc.background=new THREE.Color(0x9fd8ff);sc.fog=new THREE.Fog(0x9fd8ff,40,90);sc.add(new THREE.HemisphereLight(0xffffff,0x6a9a4a,.9));const dl=new THREE.DirectionalLight(0xffffff,.6);dl.position.set(10,20,5);sc.add(dl);
+const bx=(w,h,d,c,x=0,y=0,z=0)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshLambertMaterial({color:c}));m.position.set(x,y,z);return m};
+const gr=new THREE.Mesh(new THREE.PlaneGeometry(70,70),new THREE.MeshLambertMaterial({color:0x7ec850}));gr.rotation.x=-Math.PI/2;sc.add(gr);
+sc.add(bx(66,.8,.3,0x8b5a2b,0,.4,33),bx(66,.8,.3,0x8b5a2b,0,.4,-33),bx(.3,.8,66,0x8b5a2b,33,.4,0),bx(.3,.8,66,0x8b5a2b,-33,.4,0));
+for(let i=0;i<26;i++){const x=(R()-.5)*64,z=(R()-.5)*64;if(Math.hypot(x,z)>6)sc.add(bx(.5,2,.5,0x6b4a2b,x,1,z),bx(2,2,2,0x2f8f3a,x,3,z))}
+const ring=new THREE.Mesh(new THREE.RingGeometry(.9,1.1,24),new THREE.MeshBasicMaterial({color:0x00e5ff,side:2}));ring.rotation.x=-Math.PI/2;ring.position.y=.05;sc.add(ring);
+const kt=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');x.strokeStyle='#e00';x.lineWidth=6;x.lineCap='round';x.beginPath();x.arc(32,13,8,0,7);x.moveTo(32,22);x.lineTo(32,42);x.moveTo(15,30);x.lineTo(49,30);x.moveTo(32,42);x.lineTo(20,60);x.moveTo(32,42);x.lineTo(44,60);x.stroke();return new THREE.CanvasTexture(c)})();
+const snt=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');x.fillStyle='#ff9800';x.beginPath();x.arc(32,32,30,0,7);x.fill();x.font='34px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('🔊',32,35);return new THREE.CanvasTexture(c)})();
+const pring=new THREE.Mesh(new THREE.RingGeometry(.9,1.2,24),new THREE.MeshBasicMaterial({color:0xa020ff,side:2}));pring.rotation.x=-Math.PI/2;pring.visible=false;sc.add(pring);
+/* ---------- eszköztár ---------- */
+const IH=['sword','scope',null,null,null],IC={sword:'🗡️',scope:'🔭'},zf=()=>28-zw*22,sa=(u,i)=>u<.35?i+(-2.2-i)*u/.35:u<.65?-2.2+2.5*(u-.35)/.3:.3+(i-.3)*(u-.65)/.35;
+function mkHand(){const arm=new THREE.Group(),hd=new THREE.Group(),sw=new THREE.Group(),sp=new THREE.Group();arm.add(bx(.2,.65,.2,0xf1c27d,0,-.32,0));hd.position.y=-.65;
+sw.add(bx(.06,.06,.25,0x5d4037,0,0,0),bx(.34,.06,.08,0x8b5a2b,0,0,.14),bx(.07,.03,.95,0xcfd8dc,0,0,.65));sp.add(bx(.11,.11,.5,0x263238,0,0,.25),bx(.14,.14,.05,0x4fc3f7,0,0,.52));sw.visible=sp.visible=false;hd.add(sw,sp);arm.add(hd);return{arm,sw,sp}}
+function hdUpd(h,it,u,v){h.sw.visible=it=='sword';h.sp.visible=it=='scope';const i=it?-.6:-.1,a=u>=0?sa(u,i):i;h.arm.rotation.x=v?a-(it?.6:1):a}
+const vh=mkHand(),vg=new THREE.Group();vh.arm.position.set(-.38,0,0);vg.add(vh.arm);vg.position.set(0,-.15,-.2);vg.rotation.y=Math.PI;vg.visible=false;cam.add(vg);sc.add(cam);
+function hbR(){const mh=!!S&&S.hu==me.id,k=(mh?1:0)+'_'+slot;if(k==hbk)return;hbk=k;$('hb').innerHTML=[0,1,2,3,4].map(i=>`<div${i==slot?' class="on"':''}><b>${i+1}</b>${mh&&IH[i]?IC[IH[i]]:''}</div>`).join('')}
+function selSlot(i){slot=i;scopeOn=0;hbR()}
+function useItem(){if(!S||S.hu!=me.id)return;const it=IH[slot];if(it=='scope'){scopeOn=!scopeOn;return}if(swT>0)return;swT=.4;isHost?(G.P[0]&&(G.P[0].sw=.4)):send(hdc,{t:'sw'});if(it=='sword')catchIt()}
+function mk(t,hu){const g=new THREE.Group();
+if(hu){const hh=mkHand();hh.arm.position.set(.45,1.5,0);g.userData.h=hh;g.add(hh.arm)}if(hu)g.add(bx(.7,1.1,.5,0xc0392b,0,1,0),bx(.45,.45,.45,0xf1c27d,0,1.85,0),bx(1,.08,1,0x6b4a2b,0,2.1,0),bx(.4,.25,.4,0x6b4a2b,0,2.25,0),bx(.25,.7,.25,0x2c3e50,-.18,.35,0),bx(.25,.7,.25,0x2c3e50,.18,.35,0));
+else{const[c,n,s]={cow:[0xffffff,0xffb6c1,1],chicken:[0xfafafa,0xf5b800,.55],pig:[0xf6a6b8,0xf08aa0,.9],sheep:[0xf2f2e6,0x333333,.95]}[t],sw=t=='sheep';
+g.add(bx(.9*s,.7*s,1.4*s,c,0,.9*s,0),bx(.6*s,.55*s,.6*s,sw?0x333333:c,0,1.15*s,.85*s),bx(.35*s,.2*s,.25*s,n,0,1.05*s,1.2*s));
+if(t=='cow')g.add(bx(.92,.4,.5,0x222222,0,1.1,.1),bx(.5,.3,.5,0x222222,0,1.2,-.5));
+if(sw)g.add(bx(1.1*s,.85*s,1.5*s,0xfdfdf0,0,.95*s,0));
+if(t=='chicken')g.add(bx(.08,.15,.2,0xe02424,0,.98,.47));
+[-1,1].forEach(a=>[-1,1].forEach(b=>g.add(bx(.18*s,.5*s,.18*s,0x444444,a*.3*s,.25*s,b*.5*s))))}
+const f=bx(.3,.3,.3,0xff2bd6,0,2.8,0);f.visible=false;g.userData.f=f;g.add(f);const kk=new THREE.Sprite(new THREE.SpriteMaterial({map:kt,depthTest:false}));kk.scale.set(1.3,1.3,1);kk.position.y=3.7;kk.visible=false;g.userData.k=kk;g.add(kk);const ss=new THREE.Sprite(new THREE.SpriteMaterial({map:snt,depthTest:false}));ss.scale.set(.9,.9,1);ss.position.y=2.4;ss.visible=false;g.userData.s=ss;g.add(ss);return g}
+function clr(){[pm,am].forEach(o=>{for(const k in o)sc.remove(o[k]);});pm={};am={}}
+function upd(m,x,z,r,dt,sp){const dx=x-m.position.x,dz=z-m.position.z,k=Math.min(1,dt*12);m.position.x+=dx*k;m.position.z+=dz*k;if(sp)m.rotation.y+=dt*12.57;else{let dr=r-m.rotation.y;dr=Math.atan2(Math.sin(dr),Math.cos(dr));m.rotation.y+=dr*k}m.position.y=Math.hypot(dx,dz)>.02?Math.abs(Math.sin(performance.now()/90))*.1:0}
+function move(dt){const e=S.P.find(p=>p[0]==me.id);if(!e||!e[4])return;const mh=S.hu==me.id;if((mh&&(S.ph!='play'||e[9]>0))||S.ph=='end'||S.ph=='over')return;
+const fw=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),st=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);
+if(fw||st){const l=Math.hypot(fw,st),vx=(Math.sin(cy)*fw-Math.cos(cy)*st)/l,vz=(Math.cos(cy)*fw+Math.sin(cy)*st)/l,v=(mh?4.6:3.2)*dt;me.x=clamp(me.x+vx*v);me.z=clamp(me.z+vz*v);me.r=fp?cy:Math.atan2(vx,vz)}else if(fp)me.r=cy}
+function frame(){requestAnimationFrame(frame);const dt=Math.min(.1,clock.getDelta());
+if(S){const ms=new Set((S.M||[]).map(q=>q[0]+'_'+q[1]));S.P.forEach(p=>{const id=p[0];let m=pm[id];if(!m){m=pm[id]=mk(p[7],id==S.hu);sc.add(m);m.position.set(p[1],0,p[2])}
+m.visible=!!p[4];{const spn=p[11]>0;id==me.id?upd(m,me.x,me.z,me.r,dt,spn):upd(m,p[1],p[2],p[3],dt,spn);const hh=m.userData.h;if(hh){const m2=id==me.id,u=m2?(swT>0?1-swT/.4:-1):(p[13]>0?1-p[13]/.4:-1);hdUpd(hh,IH[m2?slot:p[12]],u,0)}}m.userData.f.visible=p[5]>0;m.userData.s.visible=p[10]>0;m.userData.k.visible=ms.has('0_'+id);m.rotation.z=p[9]>0?.5:0});
+S.A.forEach((a,i)=>{let m=am[i];if(!m){m=am[i]=mk(a[3]);sc.add(m);m.position.set(a[0],0,a[1])}upd(m,a[0],a[1],a[2],dt);m.rotation.z=a[4]?.5:0;m.userData.s.visible=a[5]>0;m.userData.k.visible=ms.has('1_'+i)});
+if(keys.KeyQ)cy+=dt*2;if(keys.KeyE)cy-=dt*2;move(dt);pt+=dt;if(pt>.066){pt=0;if(!isHost)send(hdc,{t:'p',x:+me.x.toFixed(2),z:+me.z.toFixed(2),r:+me.r.toFixed(2),s:slot,q:zm>.5?(zt?[zt.k,zt.i]:1):0})}}
+if(ana){ana.getByteTimeDomainData(buf);let s=0;for(const v of buf){const d=(v-128)/128;s+=d*d}const r=Math.sqrt(s/buf.length);$('mv').style.width=Math.min(100,r*300)+'%';if(mst&&cfgV){if(r>+$('th').value*.6)vho=performance.now()+500;mst.getAudioTracks()[0].enabled=performance.now()<vho||!!keys.KeyM}if(r>+$('th').value*(keys.KeyM?.3:1)){const k=Math.round(AC.sampleRate/11025),f=[];for(let i=0;i+k<=512;i+=k){let q=0;for(let j=0;j<k;j++)q+=(buf[i+j]-128)/128;f.push(q/k)}const z=zc(f,AC.sampleRate/k);if(z)zr=zr?zr*.7+z*.3:z;if(++lc>3)doMoo()}else{lc=0;zr=0}}
+const e2=S&&S.P.find(p=>p[0]==me.id),sp=!!(e2&&!e2[4]&&S.ph!='over');let cx=me.x,cz=me.z;
+if(sp){const l=S.P.filter(p=>p[4]&&p[0]!=me.id);if(l.length){if(!l.some(p=>p[0]==spT))spT=l[0][0];const m=pm[spT];if(m){cx=m.position.x;cz=m.position.z}}}
+const tid=sp?spT:me.id,tm=pm[tid];hl=!!S&&S.hu==tid;lx=cx;lz=cz;if(fp&&tm)tm.visible=false;for(const k in VG){const e=S&&S.P.find(p=>p[0]==k);VG[k].gain.value=!S?1:e?aud(e[1],e[2],0,+k):0}
+ring.position.x=cx;ring.position.z=cz;ring.visible=!!S&&!fp&&!sp;$('xh').hidden=!(S&&fp);
+swT=Math.max(0,swT-dt);vg.visible=!!S&&S.hu==me.id&&!sp&&fp&&zm<.4;if(vg.visible)hdUpd(vh,IH[slot],swT>0?1-swT/.4:-1,1);
+{const k=1-Math.exp(-dt*22);cys+=Math.atan2(Math.sin(cy-cys),Math.cos(cy-cys))*k;cps+=(cp-cps)*k;
+const hz=!!S&&S.hu==me.id&&!sp&&IH[slot]=='scope';zm+=((hz&&(scopeOn||keys.KeyZ||keys.ShiftLeft)?1:0)-zm)*(1-Math.exp(-dt*8));cam.fov=55-zm*(55-zf());cam.updateProjectionMatrix();$('zv').hidden=zm<.15;$('xh').hidden=!(S&&(fp||zm>.4));
+zt=null;if(hz){let bl=1.1;const tt=(k,i,x,z)=>{const dx=x-cx,dz=z-cz,d=Math.hypot(dx,dz),a=Math.atan2(dx,dz)-cys,q=Math.abs(Math.atan2(Math.sin(a),Math.cos(a)));if(d<1||d>70||q>1.2)return;const l=Math.sin(q)*d;if(l<bl){bl=l;zt={k,i,x,z}}};S.P.forEach(p=>p[4]&&p[0]!=me.id&&tt(0,p[0],p[1],p[2]));S.A.forEach((a,i)=>tt(1,i,a[0],a[1]))}}
+{const tg=zm>.5&&zt?(zt.k?am[zt.i]:pm[zt.i]):null;if(tg!==hlm){hlm&&tint(hlm,0);tg&&tint(tg,0x7a24d6);hlm=tg}pring.visible=!!tg;tg&&pring.position.set(tg.position.x,.06,tg.position.z)}
+const F=fp||zm>.4;if(F){cam.position.set(cx,1.7,cz);cam.lookAt(cx+Math.sin(cys)*Math.cos(cps),1.7+Math.sin(cps),cz+Math.cos(cys)*Math.cos(cps))}
+else{const el=Math.max(.05,Math.min(1.25,.45-cps)),D=8;cam.position.set(cx-Math.sin(cys)*Math.cos(el)*D,1.3+Math.sin(el)*D,cz-Math.cos(cys)*Math.cos(el)*D);cam.lookAt(cx,1.2,cz)}
+rd.render(sc,cam)}
+function rs(){rd.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}
+addEventListener('resize',rs);rs();cam.position.set(0,15,-13);
+addEventListener('keydown',e=>{if(/INPUT|TEXTAREA/.test(e.target.tagName)&&e.target.type!='range')return;keys[e.code]=1;if(e.code=='Space'){e.preventDefault();useItem()}if(/^Digit[1-5]$/.test(e.code))selSlot(+e.code[5]-1);if(e.code=='KeyM'&&!ana)doMoo(1);if(e.code=='KeyV')fp=!fp;if(e.code=='Tab'){e.preventDefault();const l=S?S.P.filter(p=>p[4]&&p[0]!=me.id):[];if(l.length)spT=l[(l.findIndex(p=>p[0]==spT)+1)%l.length][0]}});
+addEventListener('keyup',e=>keys[e.code]=0);cv.oncontextmenu=e=>e.preventDefault();addEventListener('mousedown',e=>{if(e.button==2)markIt()});cv.onpointerdown=e=>{if(e.button==2)return;if(document.pointerLockElement!=cv&&cv.requestPointerLock){cv.requestPointerLock();return}useItem()};
+addEventListener('mousemove',e=>{if(document.pointerLockElement==cv){const q=.0025*cam.fov/55;cy-=e.movementX*q;cp=Math.max(-1.4,Math.min(1.4,cp-e.movementY*q))}});addEventListener('wheel',e=>{if(S&&S.hu==me.id&&IH[slot]=='scope'&&(scopeOn||keys.KeyZ||keys.ShiftLeft)){e.preventDefault();zw=Math.max(0,Math.min(1,zw-e.deltaY*.0015));toast('🔭 Nagyítás ×'+(55/zf()).toFixed(1))}},{passive:false});frame();
+function fromLink(){const q=(location.hash.slice(1)||new URLSearchParams(location.search).get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(q.length>=4){$('oc').value=q;$('jp').hidden=false;$('bg').textContent='Csatlakozás a(z) '+q+' szobához'}}
+fromLink();addEventListener('hashchange',fromLink);
+</script></body></html>
