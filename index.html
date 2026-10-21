@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="hu"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -69,7 +68,7 @@ button{background:var(--ac);color:#fff;border:0;cursor:pointer;font-weight:600}b
 <script>
 const $=i=>document.getElementById(i),R=Math.random,sh=(i,o)=>$(i).hidden=!o,esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 const AN={cow:'🐄',chicken:'🐔',pig:'🐖',sheep:'🐑'},NM={cow:'Tehén',chicken:'Csirke',pig:'Disznó',sheep:'Juh'};
-let me={id:0,name:'',an:'cow',x:0,z:0,r:0},isHost=false,peers={},hdc=null,L=[],S=null,sq=-1,pend=null,nid=1,G={ph:'lobby',P:{}},keys={},AC,ana,buf,mooCd=0,tT=0,pt=0,pm={},am={},msrc,SM={},tz={},VB={},RB={},rcg=0,lc=0,zr=0,cy=0,cp=0,fp=0,spT=-1,lx=0,lz=0,hl=0,zm=0,zt=null,cys=0,cps=0,cfgV=0,vq={},slot=0,swT=0,scopeOn=0,zw=.6,hbk='';
+let me={id:0,name:'',an:'cow',x:0,z:0,r:0},isHost=false,peers={},hdc=null,L=[],S=null,sq=-1,pend=null,nid=1,G={ph:'lobby',P:{}},keys={},AC,ana,buf,mooCd=0,tT=0,pt=0,pm={},am={},msrc,SM={},tz={},VB={},RB={},rcg=0,lc=0,zr=0,cy=0,cp=0,fp=0,spT=-1,lx=0,lz=0,hl=0,zm=0,zt=null,cys=0,cps=0,cfgV=0,vq={},slot=0,swT=0,scopeOn=0,zw=.6,hbk='',lmT=0;
 const send=(d,m)=>d&&d.readyState=='open'&&d.send(JSON.stringify(m)),bc=m=>{const s=JSON.stringify(m);for(const d of Object.values(peers))d.readyState=='open'&&d.send(s)};
 const enc=o=>btoa(JSON.stringify(o)),dec=s=>JSON.parse(atob(s.trim())),clamp=v=>Math.max(-31,Math.min(31,v));
 const gather=pc=>new Promise(r=>{if(pc.iceGatheringState=='complete')return r();pc.onicegatheringstatechange=()=>pc.iceGatheringState=='complete'&&r();setTimeout(r,6000)});
@@ -85,7 +84,7 @@ for(let i=0;i<n;i++){const t=c.currentTime+i*(du+.06),o=c.createOscillator(),g=c
 if(vb){const l=c.createOscillator(),lg=c.createGain();l.frequency.value=vb;lg.gain.value=f0*.08;l.connect(lg);lg.connect(o.frequency);l.start(t);l.stop(t+du)}
 o.connect(f);f.connect(g);g.connect(c.destination);o.start(t);o.stop(t+du+.05)}}
 function beep(){const c=ctx(),o=c.createOscillator(),g=c.createGain();o.frequency.value=880;g.gain.value=.12;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.15)}
-async function startMic(){const c=ctx();try{const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});mst=st;ana=c.createAnalyser();ana.fftSize=512;msrc=c.createMediaStreamSource(st);msrc.connect(ana);buf=new Uint8Array(512)}catch(e){toast('Nincs mikrofon – az M billentyű helyettesíti')}}
+async function startMic(){const c=ctx();try{const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});mst=st;ana=c.createAnalyser();ana.fftSize=512;msrc=c.createMediaStreamSource(new MediaStream([st.getAudioTracks()[0].clone()]));msrc.connect(ana);buf=new Uint8Array(512)}catch(e){toast('Nincs mikrofon – az M billentyű helyettesíti')}}
 function doMoo(f){const t=performance.now();if(t<mooCd||!S||S.hu==me.id||(S.ph!='play'&&S.ph!='hide'))return;
 
 mooCd=t+1500;isHost?hmoo(0):send(hdc,{t:'moo'})}
@@ -100,7 +99,7 @@ function rv(k,m,f){const r=RB[k]=RB[k]||[];r[m.i]=m.d;if(r.filter(Boolean).lengt
 async function sv(p,a,b){try{const c=ctx(),u=Uint8Array.from(atob(b),q=>q.charCodeAt(0)),bf=await c.decodeAudioData(u.buffer),d=bf.getChannelData(0);let pk=.001;for(const v of d)pk=Math.max(pk,Math.abs(v));bf.g=Math.min(4,.8/pk);(SM[p]=SM[p]||{})[a]=bf;if(p==me.id){const e=document.querySelector(`#vb [data-k=${a}]`);e&&e.classList.add('ok')}}catch(e){toast('Hibás hangfelvétel')}}
 function vclip(p,a,b,ex){(VB[p]=VB[p]||{})[a]=b;sv(p,a,b);for(const i in peers)if(i!=ex)sendv(peers[i],p,a,b);L.forEach(q=>q.v=Object.keys(VB[q.id]||{}).length);bc({t:'lobby',L});rl()}
 function rec(a){if(rcg)return;if(!mst)return toast('Nincs mikrofon – a felvételhez kell');if(!window.MediaRecorder)return toast('A böngésződ nem támogatja a felvételt');
-const tr=mst.getAudioTracks()[0].clone(),mt=['audio/webm;codecs=opus','audio/mp4'].find(t=>MediaRecorder.isTypeSupported(t)),mr=new MediaRecorder(new MediaStream([tr]),mt?{mimeType:mt,audioBitsPerSecond:64000}:{}),ch=[];rcg=1;toast('🎙 Most mondd: '+PR[a]+' (1,6 mp)');
+const tr=mst.getAudioTracks()[0].clone(),mt=['audio/webm;codecs=opus','audio/mp4'].find(t=>MediaRecorder.isTypeSupported(t)),mr=new MediaRecorder(new MediaStream([tr]),mt?{mimeType:mt,audioBitsPerSecond:64000}:{}),ch=[];rcg=1;tr.enabled=true;mr.onerror=()=>{rcg=0};toast('🎙 Most mondd: '+PR[a]+' (1,6 mp)');
 mr.ondataavailable=e=>e.data.size&&ch.push(e.data);
 mr.onstop=async()=>{tr.stop();rcg=0;const ab=await new Blob(ch,{type:mr.mimeType}).arrayBuffer(),u=new Uint8Array(ab);let q='';for(let i=0;i<u.length;i+=8000)q+=String.fromCharCode.apply(null,u.subarray(i,i+8000));const b=btoa(q);
 try{const d=(await ctx().decodeAudioData(ab.slice(0))).getChannelData(0);let pk=0;for(const v of d)pk=Math.max(pk,Math.abs(v));if(pk<.02)return toast('Túl halk, próbáld újra!')}catch(e){return toast('A felvétel nem sikerült')}
@@ -146,8 +145,8 @@ const snd2=(a,x,z,vo,w,ai)=>{bc({t:'snd',a,x,z,vo,w,ai});snd(a,x,z,vo,w,ai)},ev=
 function nextRound(){G.rd++;{const o=G.order.filter(i=>!G.P[i].gone);G.hu=o[(G.rd-1)%o.length]}G.seq++;G.ph='hide';G.tm=5;G.call=0;G.nc=8;G.sec=0;G.msg='';G.mk=[];
 Object.values(G.P).forEach(p=>{p.alive=p.gone?0:1;p.nt=10+R()*10;p.call=0;p.spin=0;p.sw=0;p.mt=0;p.sl=0;p.sn=0;p.flag=0;p.stun=0;p.cd=0;if(p.id==G.hu){p.x=0;p.z=0}else{[p.x,p.z]=rp(8)}});
 const T=Object.keys(AN),vp=G.order.filter(i=>VB[i]&&Object.keys(VB[i]).length>3);G.A=[];for(let i=0;i<16;i++){const q=rp(6);G.A.push({x:q[0],z:q[1],r:0,an:T[i%4],vo:vp.length?vp[R()*vp.length|0]:-1,tx:q[0],tz:q[1],w:R()*2,st:0,sn:0,nt:2+R()*23})}}
-function hm(id,m){const p=G.P[id];if(m.t=='p'&&p&&isFinite(m.x+m.z+m.r)){p.x=clamp(m.x);p.z=clamp(m.z);p.r=m.r;p.sl=m.s>=0&&m.s<5?m.s|0:0;p.q=m.q}else if(m.t=='moo')hmoo(id);else if(m.t=='sw'){if(p&&id==G.hu)p.sw=.4}else if(m.t=='mk')hmk(id,m.k,m.i);else if(m.t=='c')hcatch(id,m.r);else if(m.t=='v'&&AN[m.a])rv('v'+id+m.a,m,b=>vclip(id,m.a,b,id))}
-function hmoo(id){const p=G.P[id];if(!p||!p.alive||id==G.hu||(G.ph!='play'&&G.ph!='hide'))return;p.nt=10+R()*10;if(p.mt>0)return;p.mt=4;p.sn=1.8;if(!cfgV)snd2(p.an,p.x,p.z,id,id)}
+function hm(id,m){const p=G.P[id];if(m.t=='p'&&p&&isFinite(m.x+m.z+m.r)){p.x=clamp(m.x);p.z=clamp(m.z);p.r=m.r;p.sl=m.s>=0&&m.s<5?m.s|0:0;p.q=m.q}else if(m.t=='moo')hmoo(id,m.l);else if(m.t=='sw'){if(p&&id==G.hu)p.sw=.4}else if(m.t=='mk')hmk(id,m.k,m.i);else if(m.t=='c')hcatch(id,m.r);else if(m.t=='v'&&AN[m.a])rv('v'+id+m.a,m,b=>vclip(id,m.a,b,id))}
+function hmoo(id,l){const p=G.P[id];if(!p||!p.alive||id==G.hu||(G.ph!='play'&&G.ph!='hide'))return;p.nt=10+R()*10;if(l)p.sn=Math.max(p.sn||0,.6);if(p.mt>0)return;p.mt=4;p.sn=1.8;if(!cfgV)snd2(p.an,p.x,p.z,id,id)}
 function hcatch(id,ry){if(G.ph!='play'||id!=G.hu)return;const h=G.P[id];if(h.cd>0||h.stun>0)return;h.cd=.8;ry=isFinite(ry)?ry:h.r;const fc=(x,z)=>{const q=Math.atan2(x-h.x,z-h.z)-ry;return Math.abs(Math.atan2(Math.sin(q),Math.cos(q)))<.9};let best=null,bd=3.2;
 Object.values(G.P).forEach(p=>{if(p.id!=id&&p.alive){const d=Math.hypot(p.x-h.x,p.z-h.z);if(d<bd&&fc(p.x,p.z)){bd=d;best=p}}});
 G.A.forEach(a=>{if(a.st<=0){const d=Math.hypot(a.x-h.x,a.z-h.z);if(d<bd&&fc(a.x,a.z)){bd=d;best=a}}});if(!best)return;
@@ -225,7 +224,7 @@ if(S){const ms=new Set((S.M||[]).map(q=>q[0]+'_'+q[1]));S.P.forEach(p=>{const id
 m.visible=!!p[4];{const spn=p[11]>0;id==me.id?upd(m,me.x,me.z,me.r,dt,spn):upd(m,p[1],p[2],p[3],dt,spn);const hh=m.userData.h;if(hh){const m2=id==me.id,u=m2?(swT>0?1-swT/.4:-1):(p[13]>0?1-p[13]/.4:-1);hdUpd(hh,IH[m2?slot:p[12]],u,0)}}m.userData.f.visible=p[5]>0;m.userData.s.visible=p[10]>0;m.userData.k.visible=ms.has('0_'+id);m.rotation.z=p[9]>0?.5:0});
 S.A.forEach((a,i)=>{let m=am[i];if(!m){m=am[i]=mk(a[3]);sc.add(m);m.position.set(a[0],0,a[1])}upd(m,a[0],a[1],a[2],dt);m.rotation.z=a[4]?.5:0;m.userData.s.visible=a[5]>0;m.userData.k.visible=ms.has('1_'+i)});
 if(keys.KeyQ)cy+=dt*2;if(keys.KeyE)cy-=dt*2;move(dt);pt+=dt;if(pt>.066){pt=0;if(!isHost)send(hdc,{t:'p',x:+me.x.toFixed(2),z:+me.z.toFixed(2),r:+me.r.toFixed(2),s:slot,q:zm>.5?(zt?[zt.k,zt.i]:1):0})}}
-if(ana){ana.getByteTimeDomainData(buf);let s=0;for(const v of buf){const d=(v-128)/128;s+=d*d}const r=Math.sqrt(s/buf.length);$('mv').style.width=Math.min(100,r*300)+'%';if(mst&&cfgV){if(r>+$('th').value*.6)vho=performance.now()+500;mst.getAudioTracks()[0].enabled=performance.now()<vho||!!keys.KeyM}if(r>+$('th').value*(keys.KeyM?.3:1)){const k=Math.round(AC.sampleRate/11025),f=[];for(let i=0;i+k<=512;i+=k){let q=0;for(let j=0;j<k;j++)q+=(buf[i+j]-128)/128;f.push(q/k)}const z=zc(f,AC.sampleRate/k);if(z)zr=zr?zr*.7+z*.3:z;if(++lc>3)doMoo()}else{lc=0;zr=0}}
+if(keys.KeyM&&S&&S.hu!=me.id&&(S.ph=='play'||S.ph=='hide')&&performance.now()>lmT){lmT=performance.now()+250;isHost?hmoo(0,1):send(hdc,{t:'moo',l:1})}if(ana){ana.getByteTimeDomainData(buf);let s=0;for(const v of buf){const d=(v-128)/128;s+=d*d}const r=Math.sqrt(s/buf.length);$('mv').style.width=Math.min(100,r*300)+'%';if(mst&&cfgV){if(r>+$('th').value*.6)vho=performance.now()+500;mst.getAudioTracks()[0].enabled=performance.now()<vho||!!keys.KeyM||!!(S&&S.hu==me.id)}if(r>+$('th').value*(keys.KeyM?.3:1)){const k=Math.round(AC.sampleRate/11025),f=[];for(let i=0;i+k<=512;i+=k){let q=0;for(let j=0;j<k;j++)q+=(buf[i+j]-128)/128;f.push(q/k)}const z=zc(f,AC.sampleRate/k);if(z)zr=zr?zr*.7+z*.3:z;if(++lc>3)doMoo()}else{lc=0;zr=0}}
 const e2=S&&S.P.find(p=>p[0]==me.id),sp=!!(e2&&!e2[4]&&S.ph!='over');let cx=me.x,cz=me.z;
 if(sp){const l=S.P.filter(p=>p[4]&&p[0]!=me.id);if(l.length){if(!l.some(p=>p[0]==spT))spT=l[0][0];const m=pm[spT];if(m){cx=m.position.x;cz=m.position.z}}}
 const tid=sp?spT:me.id,tm=pm[tid];hl=!!S&&S.hu==tid;lx=cx;lz=cz;if(fp&&tm)tm.visible=false;for(const k in VG){const e=S&&S.P.find(p=>p[0]==k);VG[k].gain.value=!S?1:e?aud(e[1],e[2],0,+k):0}
