@@ -168,8 +168,8 @@ const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun.cl
 /* Optional own TURN relay: helps when two players cannot connect directly (different networks, mobile data, strict NAT).
    Fill it in once and everyone who uses this file gets it automatically - nothing to type in the menu.
    Example: const MY_TURN={urls:['turn:YOUR-SERVER:80','turn:YOUR-SERVER:443?transport=tcp'],username:'USER',credential:'PASSWORD'}; */
-const MY_TURN={urls:[],username:'',credential:''};
-if(MY_TURN.urls.length)ICE.iceServers.push({urls:[].concat(MY_TURN.urls),username:MY_TURN.username,credential:MY_TURN.credential});
+const MY_TURN={urls:['turn:free.expressturn.com:3478'],username:'000000002108047571',credential:'IPRebPzOgAb35sb2jdXLOiycrJQ='};
+if(MY_TURN.urls.length)ICE.iceServers.unshift({urls:[].concat(MY_TURN.urls),username:MY_TURN.username,credential:MY_TURN.credential});
 function toast(m){const t=$('ts');t.textContent=m;t.hidden=false;clearTimeout(tT);tT=setTimeout(()=>t.hidden=true,3200)}
 /* ---------- audio ---------- */
 const ctx=()=>{AC=AC||new(window.AudioContext||window.webkitAudioContext)();AC.resume();return AC};
