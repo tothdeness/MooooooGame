@@ -235,7 +235,7 @@ lo.type='sine';lo.frequency.setValueAtTime(240,t);lo.frequency.exponentialRampTo
 s.connect(f);f.connect(h);h.connect(g);lo.connect(lg);let o=c.createGain();g.connect(o);lg.connect(o);if(c.createStereoPanner){const p=c.createStereoPanner();p.pan.value=pan||0;o.connect(p);p.connect(c.destination)}else o.connect(c.destination);
 s.start(t);s.stop(t+.45);lo.start(t);lo.stop(t+.4)}
 function beep(){const c=ctx(),o=c.createOscillator(),g=c.createGain();o.frequency.value=880;g.gain.value=.12;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.15)}
-async function startMic(){const c=ctx();try{const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});mst=st;ana=c.createAnalyser();ana.fftSize=512;msrc=c.createMediaStreamSource(new MediaStream([st.getAudioTracks()[0].clone()]));msrc.connect(ana);buf=new Uint8Array(512)}catch(e){toast('No microphone – the M key stands in for it')}}
+async function startMic(){const c=ctx();try{const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});mst=st;dgl('Mic OK');ana=c.createAnalyser();ana.fftSize=512;msrc=c.createMediaStreamSource(new MediaStream([st.getAudioTracks()[0].clone()]));msrc.connect(ana);buf=new Uint8Array(512)}catch(e){dgl('Mic error: '+e);toast(!navigator.mediaDevices?'Microphone needs https:// or localhost – voice chat is receive-only':'No microphone access (allow it in the browser) – voice chat is receive-only')}}
 function doMoo(f){const t=performance.now();if(t<mooCd||!S||isH(me.id)||(S.ph!='play'&&S.ph!='hide'))return;
 
 mooCd=t+1500;isHost?hmoo(0):send(hdc,{t:'moo'})}
@@ -310,9 +310,14 @@ P:P.map(p=>[p.id,f(p.x),f(p.z),f(p.r),p.alive,+p.flag.toFixed(1),p.score,p.an,p.
 /* ---------- live chat, hearing, marking ---------- */
 const SIL=14;
 const aud=(x,z,k,i)=>{if(hl&&zm>.5)return zt&&zt.k==k&&zt.i==i?1:0;return Math.max(0,1-Math.hypot(x-lx,z-lz)/(hl?RC.hr:35))};
-function vcSync(){if(!cfgV||!mst||!pe||pe.destroyed)return;L.forEach(q=>{if(q.id!=me.id&&q.pid&&!vcC[q.id]&&me.id<q.id)vcAtt(pe.call(q.pid,mst,{sdpTransform:OP,metadata:{p:me.id}}),q.id)})}
-function vcAns(c){if(!cfgV||!mst)return;c.answer(mst,{sdpTransform:OP});vcAtt(c,c.metadata&&c.metadata.p)}
-function vcAtt(c,id){if(id==null)return;vcC[id]=c;c.on('stream',st=>{const a=new Audio();a.srcObject=st;a.muted=true;a.play().catch(()=>0);const x=ctx(),g=x.createGain();x.createMediaStreamSource(st).connect(g);g.connect(x.destination);VG[id]=g});c.on('close',()=>{delete vcC[id];delete VG[id]})}
+const vst=()=>mst||(vst._d=vst._d||ctx().createMediaStreamDestination().stream);
+function vcSync(){if(!cfgV||!pe||pe.destroyed)return;L.forEach(q=>{if(q.id!=me.id&&q.pid&&!vcC[q.id]&&me.id<q.id){dgl('Voice: calling '+q.name);try{const c=pe.call(q.pid,vst(),{sdpTransform:OP,metadata:{p:me.id}});c&&vcAtt(c,q.id)}catch(e){dgl('Voice call failed: '+e)}}})}
+function vcAns(c){dgl('Voice: incoming call');try{c.answer(vst(),{sdpTransform:OP});vcAtt(c,c.metadata&&c.metadata.p)}catch(e){dgl('Voice answer failed: '+e)}}
+function vcAtt(c,id){if(id==null)return;const old=vcC[id];if(old&&old!==c)try{old.close()}catch(e){}vcC[id]=c;const bye=()=>{if(vcC[id]===c){delete vcC[id];delete VG[id]}};
+const tm=setTimeout(()=>{if(!VG[id]&&vcC[id]===c){dgl('Voice: timeout, retrying');try{c.close()}catch(e){}bye()}},15000);
+c.on('stream',st=>{clearTimeout(tm);dgl('Voice: connected to '+id);if(VG[id]&&VG[id].a)VG[id].a.srcObject=null;const a=new Audio();a.autoplay=true;a.srcObject=st;a.play().catch(()=>0);VG[id]={a,gain:{set value(v){a.volume=Math.max(0,Math.min(1,v))}}}});
+c.on('close',bye);c.on('error',e=>{dgl('Voice error: '+e);bye()})}
+setInterval(vcSync,4000);
 function hmk(id,k,i){if(G.ph!='play'||!G.H.includes(id)||RC.ab<2||(k!=0&&k!=1)||!isFinite(i))return;const h=G.P[id];if(h.mc>0)return;if(k==0&&!(i!=id&&G.P[i]&&G.P[i].alive))return;if(k==1&&!G.A[i])return;h.mc=.6;const had=(G.mk||[]).some(q=>q[0]==k&&q[1]==i);G.mk=(G.mk||[]).filter(q=>!(q[0]==k&&q[1]==i));if(had)return;G.mk.push([k,i,15]);if(G.mk.length>4)G.mk.shift()}
 function markIt(){if(RC.ab<2||!S||!isH(me.id)||S.ph!='play'||!zt)return;isHost?hmk(0,zt.k,zt.i):send(hdc,{t:'mk',k:zt.k,i:zt.i})}
 /* ---------- client: state + HUD ---------- */
@@ -533,7 +538,7 @@ if(S){const ms=new Set((S.M||[]).map(q=>q[0]+'_'+q[1]));S.P.forEach(p=>{const id
 m.visible=!!p[4];{const spn=p[11]>0,ox=m.position.x,oz=m.position.z;id==me.id?upd(m,me.x,me.z,me.r,dt,spn):upd(m,p[1],p[2],p[3],dt,spn);const hh=m.userData.h;if(hh){const m2=id==me.id,u=m2?(swT>0?1-swT/.4:-1):(p[13]>0?1-p[13]/.4:-1);const ud=m.userData,dd=Math.hypot(m.position.x-ox,m.position.z-oz),v=dd>1?0:Math.min(1,dd/Math.max(dt,.001)/4);ud.w=(ud.w||0)+(v-(ud.w||0))*Math.min(1,dt*10);ud.ph=(ud.ph||0)+ud.w*dt*11;hdUpd(hh,IH[m2?slot:p[12]],u,ud.w,ud.ph)}}m.userData.f.visible=p[5]>0;m.userData.s.visible=p[10]>0;m.userData.k.visible=ms.has('0_'+id);m.rotation.z=p[9]>0?.5:0});
 S.A.forEach((a,i)=>{let m=am[i];if(!m){m=am[i]=mk(a[3]);sc.add(m);m.position.set(a[0],0,a[1])}upd(m,a[0],a[1],a[2],dt);m.rotation.z=a[4]?.5:0;m.userData.s.visible=a[5]>0;m.userData.k.visible=ms.has('1_'+i)});
 if(keys[KB.ql])cy+=dt*2;if(keys[KB.qr])cy-=dt*2;move(dt);pt+=dt;if(pt>.066){pt=0;if(!isHost)send(hdc,{t:'p',x:+me.x.toFixed(2),z:+me.z.toFixed(2),r:+me.r.toFixed(2),s:slot,q:zm>.5?(zt?[zt.k,zt.i]:1):0})}}
-if(keys[KB.mic]&&S&&!isH(me.id)&&(S.ph=='play'||S.ph=='hide')&&performance.now()>lmT){lmT=performance.now()+250;isHost?hmoo(0,1):send(hdc,{t:'moo',l:1})}if(ana){ana.getByteTimeDomainData(buf);let s=0;for(const v of buf){const d=(v-128)/128;s+=d*d}const r=Math.sqrt(s/buf.length);$('mv').style.width=Math.min(100,r*300)+'%';if(mst&&cfgV){if(r>+$('th').value*.6)vho=performance.now()+500;mst.getAudioTracks()[0].enabled=performance.now()<vho||!!keys[KB.mic]||!!(S&&isH(me.id))}if(r>+$('th').value*(keys[KB.mic]?.3:1)){const k=Math.round(AC.sampleRate/11025),f=[];for(let i=0;i+k<=512;i+=k){let q=0;for(let j=0;j<k;j++)q+=(buf[i+j]-128)/128;f.push(q/k)}const z=zc(f,AC.sampleRate/k);if(z)zr=zr?zr*.7+z*.3:z;if(++lc>3)doMoo()}else{lc=0;zr=0}}
+if(keys[KB.mic]&&S&&!isH(me.id)&&(S.ph=='play'||S.ph=='hide')&&performance.now()>lmT){lmT=performance.now()+250;isHost?hmoo(0,1):send(hdc,{t:'moo',l:1})}if(ana){ana.getByteTimeDomainData(buf);let s=0;for(const v of buf){const d=(v-128)/128;s+=d*d}const r=Math.sqrt(s/buf.length);$('mv').style.width=Math.min(100,r*300)+'%';if(mst&&cfgV){if(r>Math.min(.02,+$('th').value*.6))vho=performance.now()+800;mst.getAudioTracks()[0].enabled=performance.now()<vho||!!keys[KB.mic]||!!(S&&isH(me.id))}if(r>+$('th').value*(keys[KB.mic]?.3:1)){const k=Math.round(AC.sampleRate/11025),f=[];for(let i=0;i+k<=512;i+=k){let q=0;for(let j=0;j<k;j++)q+=(buf[i+j]-128)/128;f.push(q/k)}const z=zc(f,AC.sampleRate/k);if(z)zr=zr?zr*.7+z*.3:z;if(++lc>3)doMoo()}else{lc=0;zr=0}}
 const e2=S&&S.P.find(p=>p[0]==me.id),sp=!!(e2&&!e2[4]&&S.ph!='over');let cx=me.x,cz=me.z;
 if(sp){const l=S.P.filter(p=>p[4]&&p[0]!=me.id);if(l.length){if(!l.some(p=>p[0]==spT))spT=l[0][0];const m=pm[spT];if(m){cx=m.position.x;cz=m.position.z}}}
 const tid=sp?spT:me.id,tm=pm[tid];hl=!!S&&isH(tid);lx=cx;lz=cz;if(fp&&tm)tm.visible=false;for(const k in VG){const e=S&&S.P.find(p=>p[0]==k);VG[k].gain.value=!S?1:e?aud(e[1],e[2],0,+k):0}
@@ -573,5 +578,6 @@ rd.setRenderTarget(rt);rd.clear();rd.render(ts,tc);rd.readRenderTargetPixels(rt,
 const cv2=document.createElement('canvas');cv2.width=cv2.height=128;const x=cv2.getContext('2d'),im=x.createImageData(128,128);for(let y=0;y<128;y++)im.data.set(px.subarray((127-y)*512,(128-y)*512),y*512);x.putImageData(im,0,0);ICN[k]=cv2.toDataURL();ts.remove(o)}
 rd.setClearColor(oc,oa);rd.setRenderTarget(null)}catch(e){console.warn('icons',e)}}
 mkIcons();
+const aRes=()=>{AC&&AC.resume();for(const k in VG){const a=VG[k].a;a&&a.paused&&a.play().catch(()=>0)}};addEventListener('pointerdown',aRes);addEventListener('keydown',aRes);
 fmR();rcfg();requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(ldOff,700)));
 </script></body></html>
