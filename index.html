@@ -1,7 +1,7 @@
 <!doctype html>
-<html lang="hu"><head><meta charset="utf-8">
+<html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Muu-vadászat 3D</title>
+<title>Moo Hunt 3D</title>
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#e6f4dc;--fg:#1d2b1a;--pn:#fffffff2;--ac:#2f8f3a;--bd:#0002}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16241a;--fg:#e8f3e4;--pn:#1f3324f2;--ac:#3fa84c;--bd:#fff2}}
@@ -13,7 +13,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 .scr{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;background:#0003;overflow:auto}
 .p{background:var(--pn);border:1px solid var(--bd);border-radius:16px;padding:18px;max-width:440px;width:100%;display:flex;flex-direction:column;gap:10px;margin:auto}
 h1,h2,p{margin:0}p,small{opacity:.8;font-size:13px}
-input,textarea,button{font:inherit;padding:9px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--fg)}
+input,textarea,button,select{font:inherit;padding:9px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--fg)}
 textarea{height:60px;font-size:11px;resize:none;word-break:break-all}
 button{background:var(--ac);color:#fff;border:0;cursor:pointer;font-weight:600}button:disabled{opacity:.4}
 #an{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
@@ -32,43 +32,44 @@ button{background:var(--ac);color:#fff;border:0;cursor:pointer;font-weight:600}b
 #hb div{width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:28px;background:#8b8b8b66;border:3px solid #373737;position:relative;color:#fff}
 #hb div.on{border-color:#fff;background:#ffffff40}#hb b{position:absolute;top:0;left:3px;font-size:11px;opacity:.8}
 #dg{position:fixed;right:8px;bottom:8px;max-width:min(430px,92vw);background:#000d;color:#9f9;font:11px/1.4 monospace;padding:6px 8px;border-radius:8px;z-index:30;white-space:pre-wrap}
+#hud>#sk{top:calc(64px + env(safe-area-inset-top,0px));left:8px;font-size:18px;line-height:1.2}#sk .u{opacity:.25;filter:grayscale(1)}
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="menu" class="scr"><div class="p">
-<h1>🐄 Muu-vadászat 3D</h1>
-<p>Bújj a gépi állatok közé! Utánozd az állatod hangját a mikrofonba – ha 10–20 mp-ig hallgatsz, az állatod 5-ször megpördül, és lebuksz. Vadászként találd meg az igazi játékosokat – de a gépi állat elkapása büntet.</p>
-<input id="nm" placeholder="Neved" maxlength="12">
-<div id="an"></div>
-<small>🎙 Az élő hangchat mindig be van kapcsolva (szerveres és kézi kódos szobában is).</small>
-<button id="bh">Szoba létrehozása</button>
-<button id="bhm" style="background:var(--bg);color:var(--fg)">Szoba létrehozása szerver nélkül (kézi kód)</button>
-<button id="bj" style="background:var(--bg);color:var(--fg)">Csatlakozás szobához</button>
-<div id="jp" hidden style="display:flex;flex-direction:column;gap:8px"><small>Szobakód vagy a teljes meghívó link:</small><input id="oc" maxlength="120" placeholder="pl. K7M2Q" style="text-transform:uppercase"><button id="bg">Csatlakozás</button></div>
-<details id="km"><summary style="cursor:pointer;font-size:13px">🔌 Kézi csatlakozás (szerver nélkül)</summary><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px"><small>1. Illeszd be a házigazda kódját:</small><textarea id="kj"></textarea><button id="kg">Válasz generálása</button><small>2. Másold ezt a választ, és küldd el a házigazdának:</small><textarea id="ka" readonly onclick="this.select()"></textarea></div></details>
-<small>Fejhallgatót ajánlunk. M (nyomva tartva) = a mikrofonodba mondottat hallják élőben; mikrofon nélkül az M csak jelzi, hogy hangot adtál ki.</small>
-<details><summary style="cursor:pointer;font-size:13px">⚙ Haladó: saját TURN-szerver (ha nem épül fel a kapcsolat)</summary><input id="tu" placeholder="turn:szerver:443|felhasználó|jelszó" style="width:100%;margin-top:6px"><small>Több cím pontosvesszővel (;) elválasztva. Mindenkinek meg kell adnia (házigazdának és csatlakozónak is).</small></details>
+<h1>🐄 Moo Hunt 3D</h1>
+<p>Hide among the AI animals! Imitate your animal's sound into the microphone – if you stay silent for 10–20 seconds, your animal spins around 5 times and gives you away. As the hunter, find the real players – but catching an AI animal is penalized.</p>
+<input id="nm" placeholder="Your name" maxlength="12">
+<p>🎲 Every round you become a random, different animal – you have to imitate your animal's sound.</p><div id="an" hidden></div>
+<small>🎙 Live voice chat is always on (in server rooms and manual-code rooms alike).</small>
+<button id="bh">Create room</button>
+<button id="bhm" style="background:var(--bg);color:var(--fg)">Create room without server (manual code)</button>
+<button id="bj" style="background:var(--bg);color:var(--fg)">Join a room</button>
+<div id="jp" hidden style="display:flex;flex-direction:column;gap:8px"><small>Room code or the full invite link:</small><input id="oc" maxlength="120" placeholder="e.g. K7M2Q" style="text-transform:uppercase"><button id="bg">Join</button></div>
+<details id="km"><summary style="cursor:pointer;font-size:13px">🔌 Manual join (no server)</summary><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px"><small>1. Paste the host's code:</small><textarea id="kj"></textarea><button id="kg">Generate reply</button><small>2. Copy this reply and send it to the host:</small><textarea id="ka" readonly onclick="this.select()"></textarea></div></details>
+<small>Headphones recommended. Hold M = others hear your microphone live; without a microphone M just signals that you made a sound.</small>
+<details><summary style="cursor:pointer;font-size:13px">⚙ Advanced: custom TURN server (if the connection fails)</summary><input id="tu" placeholder="turn:server:443|user|password" style="width:100%;margin-top:6px"><small>Separate multiple addresses with semicolons (;). Everyone has to enter it (host and joiners alike).</small></details>
 </div></div>
 <div id="lobby" class="scr" hidden><div class="p">
-<h2>Váró <span id="cnt"></span></h2><div id="pl"></div>
-<div><small>🎙 Vedd fel a saját hangodat mind a 4 állathoz (1,6 mp, kattintás után azonnal szólj, fejhallgatóval). A gépi állatok a játékosok felvett hangját használják, így nem különböztethetők meg. Aki nem vesz fel hangot, annak gépi hangja lesz – az elárulja!</small><div id="vb"></div></div>
+<h2>Lobby <span id="cnt"></span></h2><div id="pl"></div><div id="md" style="display:flex;flex-direction:column;gap:6px"><small>🎮 Game mode</small><select id="mds"><option value="lim">🗡 Limited swings – the hunter gets as many swings as there are players</option><option value="cls">♾ Classic – unlimited swings</option></select><small id="mdt"></small></div>
+<div><small>🎙 Record your own voice for all 4 animals – every round you become a random animal (1.6 s, speak right after clicking, use headphones). The AI animals use the players' recorded voices, so they can't be told apart. Anyone who doesn't record gets a synthetic voice – that gives them away!</small><div id="vb"></div></div>
 <div id="hc" style="display:flex;flex-direction:column;gap:8px">
-<div id="kl" style="display:flex;flex-direction:column;gap:8px"><small>Szobakód – a barátaid a menüben a „Csatlakozás szobához” gombbal ezt adhatják meg:</small><div style="display:flex;gap:8px;align-items:center"><b id="rc" style="font-size:28px;letter-spacing:4px;flex:1"></b><button id="bk">📋 Kód másolása</button></div><small>…vagy küldd el nekik a meghívó linket:</small><input id="lk" readonly onclick="this.select()"><small id="fw" hidden style="color:#d9534f">⚠ A játék helyi fájlból fut, ezért a link csak nálad működik. Tedd fel https-es tárhelyre (pl. GitHub Pages, Netlify), és onnan nyisd meg.</small><button id="bi">🔗 Link másolása</button></div>
-<details id="kd"><summary style="cursor:pointer;font-size:13px">🔌 Játékos meghívása kézi kóddal (szerver nélkül)</summary><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px"><button id="ki">+ Játékos meghívása</button><small>Küldd el ezt a kódot a játékosnak:</small><textarea id="ko" readonly onclick="this.select()"></textarea><small>Illeszd be a játékos válaszkódját:</small><textarea id="kh"></textarea><button id="kc">Összekapcsolás</button></div></details>
-<button id="bs">Játék indítása (min. 2 játékos)</button></div>
-<small>Mozgás: WASD · Nézelődés: egér (kattints a pályára; Esc = kurzor vissza) vagy Q/E · V: FPS / külső nézet · Állatként: 10–20 mp-enként szólalj meg a mikrofonba (M nyomva tartva = élő mikrofon), különben az állatod 5-ször megpördül és lebuksz · 1–5: eszköztár (vadász: 1 = kard, 2 = távcső), bal klikk = használat · mindenki állandóan hangchatben van · Vadász: távcső (2-es slot) + bal klikk vagy Z/Shift = nagyítás, görgő = zoom (csak a célzott, lilával kijelölt állat hangját hallod), jobb klikk = jelölés, ugyanarra újra jobb klikk = jelölés visszavonása · A hangot adó állat fölött 🔊 jelzés látszik · Tab: másik játékos nézése (kiesés után) · Vadász: kard + bal klikk / Szóköz = elkapás, a hangokat csak ~7 méterről hallod.</small>
+<div id="kl" style="display:flex;flex-direction:column;gap:8px"><small>Room code – your friends can enter it in the menu with the “Join a room” button:</small><div style="display:flex;gap:8px;align-items:center"><b id="rc" style="font-size:28px;letter-spacing:4px;flex:1"></b><button id="bk">📋 Copy code</button></div><small>…or send them the invite link:</small><input id="lk" readonly onclick="this.select()"><small id="fw" hidden style="color:#d9534f">⚠ The game is running from a local file, so the link only works on your machine. Upload it to https hosting (e.g. GitHub Pages, Netlify) and open it from there.</small><button id="bi">🔗 Copy link</button></div>
+<details id="kd"><summary style="cursor:pointer;font-size:13px">🔌 Invite a player with a manual code (no server)</summary><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px"><button id="ki">+ Invite player</button><small>Send this code to the player:</small><textarea id="ko" readonly onclick="this.select()"></textarea><small>Paste the player's reply code:</small><textarea id="kh"></textarea><button id="kc">Connect</button></div></details>
+<button id="bs">Start game (min. 2 players)</button></div>
+<small>Move: WASD · Look: mouse (click the field; Esc = release the cursor) or Q/E · V: first / third person view · As an animal: make a sound into the microphone every 10–20 s (hold M = live mic), otherwise your animal spins 5 times and gives you away · 1–5: hotbar (hunter: 1 = sword, 2 = spyglass), left click = use · everyone is in voice chat all the time · Hunter: spyglass (slot 2) + left click or Z/Shift = zoom, scroll wheel = zoom level (you only hear the targeted animal, highlighted in purple), right click = mark, right click on the same animal again = unmark · A 🔊 icon shows above an animal that makes a sound · Tab: watch another player (after being caught) · Map: you move slower in the river (the bridge is fast); trees, fences and the barn are obstacles; you can walk in through the paddock gate. Hunter: sword + left click / Space = catch, you hear sounds from ~22 meters away. In limited-swings mode every swing (even a miss) counts, and you get as many swings as there are players.</small>
 </div></div>
 <div id="hud" hidden>
-<div id="tp"></div><div id="xh" hidden>+</div><div id="ph"></div><div id="sb"></div>
-<div id="mc">🎤 Mikrofon<div id="mb"><div id="mv"></div></div>Érzékenység<input id="th" type="range" min=".02" max=".3" step=".01" value=".08" style="width:100%;padding:0"></div>
+<div id="tp"></div><div id="xh" hidden>+</div><div id="ph"></div><div id="sb"></div><div id="sk" hidden></div>
+<div id="mc">🎤 Microphone<div id="mb"><div id="mv"></div></div>Sensitivity<input id="th" type="range" min=".02" max=".3" step=".01" value=".08" style="width:100%;padding:0"></div>
 </div>
-<div id="ov" class="scr" hidden><div class="p"><h2 id="ot"></h2><p id="om"></p><div id="os"></div><button id="bn" hidden>Vissza a váróba</button></div></div>
+<div id="ov" class="scr" hidden><div class="p"><h2 id="ot"></h2><p id="om"></p><div id="os"></div><button id="bn" hidden>Back to lobby</button></div></div>
 <div id="dg" hidden onclick="this.hidden=true"></div><div id="hb" hidden></div><div id="zv" hidden></div><div id="ts" hidden></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script>
 const $=i=>document.getElementById(i),R=Math.random,sh=(i,o)=>$(i).hidden=!o,esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-const AN={cow:'🐄',chicken:'🐔',pig:'🐖',sheep:'🐑'},NM={cow:'Tehén',chicken:'Csirke',pig:'Disznó',sheep:'Juh'};
-let me={id:0,name:'',an:'cow',x:0,z:0,r:0},isHost=false,peers={},hdc=null,L=[],S=null,sq=-1,pend=null,nid=1,G={ph:'lobby',P:{}},keys={},AC,ana,buf,mooCd=0,tT=0,pt=0,pm={},am={},msrc,SM={},tz={},VB={},RB={},rcg=0,lc=0,zr=0,cy=0,cp=0,fp=0,spT=-1,lx=0,lz=0,hl=0,zm=0,zt=null,cys=0,cps=0,cfgV=0,vq={},slot=0,swT=0,scopeOn=0,zw=.6,hbk='',lmT=0;
+const AN={cow:'🐄',chicken:'🐔',pig:'🐖',sheep:'🐑'},NM={cow:'Cow',chicken:'Chicken',pig:'Pig',sheep:'Sheep'};
+let MODE='lim';const HR=22;let me={id:0,name:'',an:'cow',x:0,z:0,r:0},isHost=false,peers={},hdc=null,L=[],S=null,sq=-1,pend=null,nid=1,G={ph:'lobby',P:{}},keys={},AC,ana,buf,mooCd=0,tT=0,pt=0,pm={},am={},msrc,SM={},tz={},VB={},RB={},rcg=0,lc=0,zr=0,cy=0,cp=0,fp=0,spT=-1,lx=0,lz=0,hl=0,zm=0,zt=null,cys=0,cps=0,cfgV=0,vq={},slot=0,swT=0,scopeOn=0,zw=.6,hbk='',lmT=0;
 const send=(d,m)=>d&&d.readyState=='open'&&d.send(JSON.stringify(m)),bc=m=>{const s=JSON.stringify(m);for(const d of Object.values(peers))d.readyState=='open'&&d.send(s)};
 const enc=o=>btoa(JSON.stringify(o)),dec=s=>JSON.parse(atob(s.trim())),clamp=v=>Math.max(-31,Math.min(31,v));
 const gather=pc=>new Promise(r=>{if(pc.iceGatheringState=='complete')return r();pc.onicegatheringstatechange=()=>pc.iceGatheringState=='complete'&&r();setTimeout(r,6000)});
@@ -83,130 +84,295 @@ const [f0,f1,ty,du,vb,n]=SN[a],v=v0*.25;
 for(let i=0;i<n;i++){const t=c.currentTime+i*(du+.06),o=c.createOscillator(),g=c.createGain(),f=c.createBiquadFilter();o.type=ty;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+du);f.type='lowpass';f.frequency.value=1200;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+.04);g.gain.linearRampToValueAtTime(0,t+du);
 if(vb){const l=c.createOscillator(),lg=c.createGain();l.frequency.value=vb;lg.gain.value=f0*.08;l.connect(lg);lg.connect(o.frequency);l.start(t);l.stop(t+du)}
 o.connect(f);f.connect(g);g.connect(c.destination);o.start(t);o.stop(t+du+.05)}}
+let NB=null;
+function swish(v,pan){const c=ctx(),t=c.currentTime;if(!NB){NB=c.createBuffer(1,c.sampleRate,c.sampleRate);const d=NB.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=R()*2-1}
+const s=c.createBufferSource(),f=c.createBiquadFilter(),h=c.createBiquadFilter(),g=c.createGain(),lo=c.createOscillator(),lg=c.createGain();s.buffer=NB;s.playbackRate.value=.9+R()*.2;
+f.type='bandpass';f.Q.value=1.4;f.frequency.setValueAtTime(350,t);f.frequency.exponentialRampToValueAtTime(3200,t+.2);f.frequency.exponentialRampToValueAtTime(700,t+.42);
+h.type='highpass';h.frequency.value=180;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.001,v),t+.17);g.gain.exponentialRampToValueAtTime(.0001,t+.42);
+lo.type='sine';lo.frequency.setValueAtTime(240,t);lo.frequency.exponentialRampToValueAtTime(70,t+.35);lg.gain.setValueAtTime(.0001,t);lg.gain.exponentialRampToValueAtTime(Math.max(.001,v*.12),t+.12);lg.gain.exponentialRampToValueAtTime(.0001,t+.38);
+s.connect(f);f.connect(h);h.connect(g);lo.connect(lg);let o=c.createGain();g.connect(o);lg.connect(o);if(c.createStereoPanner){const p=c.createStereoPanner();p.pan.value=pan||0;o.connect(p);p.connect(c.destination)}else o.connect(c.destination);
+s.start(t);s.stop(t+.45);lo.start(t);lo.stop(t+.4)}
 function beep(){const c=ctx(),o=c.createOscillator(),g=c.createGain();o.frequency.value=880;g.gain.value=.12;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.15)}
-async function startMic(){const c=ctx();try{const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});mst=st;ana=c.createAnalyser();ana.fftSize=512;msrc=c.createMediaStreamSource(new MediaStream([st.getAudioTracks()[0].clone()]));msrc.connect(ana);buf=new Uint8Array(512)}catch(e){toast('Nincs mikrofon – az M billentyű helyettesíti')}}
+async function startMic(){const c=ctx();try{const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});mst=st;ana=c.createAnalyser();ana.fftSize=512;msrc=c.createMediaStreamSource(new MediaStream([st.getAudioTracks()[0].clone()]));msrc.connect(ana);buf=new Uint8Array(512)}catch(e){toast('No microphone – the M key stands in for it')}}
 function doMoo(f){const t=performance.now();if(t<mooCd||!S||S.hu==me.id||(S.ph!='play'&&S.ph!='hide'))return;
 
 mooCd=t+1500;isHost?hmoo(0):send(hdc,{t:'moo'})}
 function catchIt(){if(!S||S.hu!=me.id||S.ph!='play')return;isHost?hcatch(0,cy):send(hdc,{t:'c',r:cy})}
-/* ---------- hangfelvétel ---------- */
-const PR={cow:'Muuu!',chicken:'Kot-kot!',pig:'Röff-röff!',sheep:'Bééé!'};
+/* ---------- voice recording ---------- */
+const PR={cow:'Moooo!',chicken:'Cluck-cluck!',pig:'Oink-oink!',sheep:'Baaaa!'};
 $('vb').innerHTML=Object.keys(AN).map(k=>`<button class="ab" data-k="${k}">${AN[k]}<small>${NM[k]}</small></button>`).join('');
 $('vb').onclick=e=>{const b=e.target.closest('button');if(b)rec(b.dataset.k)};
 const zc=(d,sr)=>{let pk=0,n=0,c=0,p=0;for(const v of d)pk=Math.max(pk,Math.abs(v));for(const v of d)if(Math.abs(v)>pk*.3){n++;if(p&&(v>0)!=(p>0))c++;p=v}return n>10?c/(n/sr):0};
 const sendv=(d,p,a,b)=>{const n=Math.ceil(b.length/12000);for(let i=0;i<n;i++)send(d,{t:'v',p,a,i,n,d:b.slice(i*12000,(i+1)*12000)})};
 function rv(k,m,f){const r=RB[k]=RB[k]||[];r[m.i]=m.d;if(r.filter(Boolean).length==m.n){delete RB[k];f(r.join(''))}}
-async function sv(p,a,b){try{const c=ctx(),u=Uint8Array.from(atob(b),q=>q.charCodeAt(0)),bf=await c.decodeAudioData(u.buffer),d=bf.getChannelData(0);let pk=.001;for(const v of d)pk=Math.max(pk,Math.abs(v));bf.g=Math.min(4,.8/pk);(SM[p]=SM[p]||{})[a]=bf;if(p==me.id){const e=document.querySelector(`#vb [data-k=${a}]`);e&&e.classList.add('ok')}}catch(e){toast('Hibás hangfelvétel')}}
-function vclip(p,a,b,ex){(VB[p]=VB[p]||{})[a]=b;sv(p,a,b);for(const i in peers)if(i!=ex)sendv(peers[i],p,a,b);L.forEach(q=>q.v=Object.keys(VB[q.id]||{}).length);bc({t:'lobby',L});rl()}
-function rec(a){if(rcg)return;if(!mst)return toast('Nincs mikrofon – a felvételhez kell');if(!window.MediaRecorder)return toast('A böngésződ nem támogatja a felvételt');
-const tr=mst.getAudioTracks()[0].clone(),mt=['audio/webm;codecs=opus','audio/mp4'].find(t=>MediaRecorder.isTypeSupported(t)),mr=new MediaRecorder(new MediaStream([tr]),mt?{mimeType:mt,audioBitsPerSecond:64000}:{}),ch=[];rcg=1;tr.enabled=true;mr.onerror=()=>{rcg=0};toast('🎙 Most mondd: '+PR[a]+' (1,6 mp)');
+async function sv(p,a,b){try{const c=ctx(),u=Uint8Array.from(atob(b),q=>q.charCodeAt(0)),bf=await c.decodeAudioData(u.buffer),d=bf.getChannelData(0);let pk=.001;for(const v of d)pk=Math.max(pk,Math.abs(v));bf.g=Math.min(4,.8/pk);(SM[p]=SM[p]||{})[a]=bf;if(p==me.id){const e=document.querySelector(`#vb [data-k=${a}]`);e&&e.classList.add('ok')}}catch(e){toast('Invalid voice recording')}}
+function vclip(p,a,b,ex){(VB[p]=VB[p]||{})[a]=b;sv(p,a,b);for(const i in peers)if(i!=ex)sendv(peers[i],p,a,b);L.forEach(q=>q.v=Object.keys(VB[q.id]||{}).length);bc({t:'lobby',L,md:MODE});rl()}
+function rec(a){if(rcg)return;if(!mst)return toast('No microphone – needed for recording');if(!window.MediaRecorder)return toast('Your browser does not support recording');
+const tr=mst.getAudioTracks()[0].clone(),mt=['audio/webm;codecs=opus','audio/mp4'].find(t=>MediaRecorder.isTypeSupported(t)),mr=new MediaRecorder(new MediaStream([tr]),mt?{mimeType:mt,audioBitsPerSecond:64000}:{}),ch=[];rcg=1;tr.enabled=true;mr.onerror=()=>{rcg=0};toast('🎙 Say it now: '+PR[a]+' (1.6 s)');
 mr.ondataavailable=e=>e.data.size&&ch.push(e.data);
 mr.onstop=async()=>{tr.stop();rcg=0;const ab=await new Blob(ch,{type:mr.mimeType}).arrayBuffer(),u=new Uint8Array(ab);let q='';for(let i=0;i<u.length;i+=8000)q+=String.fromCharCode.apply(null,u.subarray(i,i+8000));const b=btoa(q);
-try{const d=(await ctx().decodeAudioData(ab.slice(0))).getChannelData(0);let pk=0;for(const v of d)pk=Math.max(pk,Math.abs(v));if(pk<.02)return toast('Túl halk, próbáld újra!')}catch(e){return toast('A felvétel nem sikerült')}
-isHost?vclip(0,a,b,-1):(sv(me.id,a,b),sendv(hdc,0,a,b));toast('✓ Felvéve: '+NM[a])};mr.start();setTimeout(()=>mr.stop(),1700)}
-/* ---------- menü / szoba ---------- */
+try{const d=(await ctx().decodeAudioData(ab.slice(0))).getChannelData(0);let pk=0;for(const v of d)pk=Math.max(pk,Math.abs(v));if(pk<.02)return toast('Too quiet, try again!')}catch(e){return toast('Recording failed')}
+isHost?vclip(0,a,b,-1):(sv(me.id,a,b),sendv(hdc,0,a,b));toast('✓ Recorded: '+NM[a])};mr.start();setTimeout(()=>mr.stop(),1700)}
+/* ---------- menu / room ---------- */
 $('an').innerHTML=Object.keys(AN).map(k=>`<button class="ab${k=='cow'?' on':''}" data-k="${k}">${AN[k]}<small>${NM[k]}</small></button>`).join('');
 $('an').onclick=e=>{const b=e.target.closest('button');if(!b)return;me.an=b.dataset.k;document.querySelectorAll('.ab').forEach(x=>x.classList.toggle('on',x==b))};
-let cu=null,sgo=0;const dgs=[];function dgl(m){dgs.push(new Date().toLocaleTimeString()+' '+m);if(dgs.length>9)dgs.shift();const d=$('dg');d.hidden=false;d.textContent='Kapcsolat-napló (kattints a bezáráshoz)\n'+dgs.join('\n')}
-function dgc(c,w){try{const pc=c.peerConnection;if(!pc)return;pc.addEventListener('icecandidate',e=>{if(e.candidate){const t=/ typ (\w+)/.exec(e.candidate.candidate);dgl(w+' ICE jelölt: '+(t?t[1]:'?'))}else dgl(w+' ICE-gyűjtés kész')});pc.addEventListener('iceconnectionstatechange',()=>{dgl(w+' ICE állapot: '+pc.iceConnectionState);if(pc.iceConnectionState=='failed')toast('A közvetlen kapcsolat nem épült fel (hálózat/NAT) – kell hozzá TURN-szerver (Haladó) vagy másik hálózat.')})}catch(e){}}
-const prep=()=>{me.name=($('nm').value.trim()||'Játékos'+(10+R()*89|0)).slice(0,12);sgo=0;const t=$('tu').value.trim();try{localStorage.setItem('muuTurn',t)}catch(e){}ICE.iceServers=ICE.iceServers.filter(x=>x!==cu);cu=null;if(t){const[u,n,c]=t.split('|');if(u){cu={urls:u.split(';').map(q=>q.trim()),username:n,credential:c};ICE.iceServers.push(cu)}}};
+let cu=null,sgo=0;const dgs=[];function dgl(m){dgs.push(new Date().toLocaleTimeString()+' '+m);if(dgs.length>9)dgs.shift();const d=$('dg');d.hidden=false;d.textContent='Connection log (click to close)\n'+dgs.join('\n')}
+function dgc(c,w){try{const pc=c.peerConnection;if(!pc)return;pc.addEventListener('icecandidate',e=>{if(e.candidate){const t=/ typ (\w+)/.exec(e.candidate.candidate);dgl(w+' ICE candidate: '+(t?t[1]:'?'))}else dgl(w+' ICE gathering done')});pc.addEventListener('iceconnectionstatechange',()=>{dgl(w+' ICE state: '+pc.iceConnectionState);if(pc.iceConnectionState=='failed')toast('The direct connection could not be established (network/NAT) – you need a TURN server (Advanced) or another network.')})}catch(e){}}
+const prep=()=>{me.name=($('nm').value.trim()||'Player'+(10+R()*89|0)).slice(0,12);sgo=0;const t=$('tu').value.trim();try{localStorage.setItem('muuTurn',t)}catch(e){}ICE.iceServers=ICE.iceServers.filter(x=>x!==cu);cu=null;if(t){const[u,n,c]=t.split('|');if(u){cu={urls:u.split(';').map(q=>q.trim()),username:n,credential:c};ICE.iceServers.push(cu)}}};
 try{$('tu').value=localStorage.getItem('muuTurn')||''}catch(e){}
-function rl(){$('pl').innerHTML=L.map(p=>`<div>${AN[p.an]} ${esc(p.name)}${p.id==0?' 👑':''} <small>🎙 ${p.v||0}/4</small></div>`).join('');$('hc').hidden=!isHost;$('bs').disabled=L.length<2;$('cnt').textContent=L.length+'/8';vcSync()}
+function rl(){$('pl').innerHTML=L.map(p=>`<div>🎲 ${esc(p.name)}${p.id==0?' 👑':''} <small>🎙 ${p.v||0}/4</small></div>`).join('');$('hc').hidden=!isHost;$('bs').disabled=L.length<2;$('cnt').textContent=L.length+'/8';$('mds').hidden=!isHost;$('mds').value=MODE;$('mdt').textContent=MODE=='lim'?'🗡 The hunter will have '+L.length+' swings (as many as there are players).':'♾ Unlimited swings.';vcSync()}
 let pe,mst,vho=0,hlm=null;const vcC={},VG={},OP=s=>s.replace('useinbandfec=1','useinbandfec=1;stereo=0;maxaveragebitrate=64000');
 const wrap=c=>{const w={get readyState(){return c.open?'open':'connecting'},send:s=>c.send(s),onopen:0,onmessage:0,onclose:0};c.on('open',()=>w.onopen&&w.onopen());c.on('data',d=>w.onmessage&&w.onmessage({data:d}));c.on('close',()=>w.onclose&&w.onclose());c.on('error',()=>w.onclose&&w.onclose());return w};
 function mkRoom(){const code=Array.from({length:5},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[R()*32|0]).join('');pe=new Peer('muu-'+code,{config:ICE});
-pe.on('error',e=>{dgl('Hiba: '+e.type+' '+(e.message||''));if(e.type=='unavailable-id')mkRoom();else{$('bh').disabled=false;toast(/network|socket|server/.test(e.type)?'A párosító szerver nem érhető el – ellenőrizd a netkapcsolatot':'Hálózati hiba: '+e.type)}});pe.on('disconnected',()=>pe.reconnect());pe.on('connection',c=>{dgl('Beérkező kapcsolat');dgc(c,'Vendég');hdcSetup(wrap(c))});pe.on('call',vcAns);
-pe.on('open',()=>{dgl('Párosító szerver OK, szoba: '+pe.id);L[0].pid=pe.id;$('rc').textContent=code;$('lk').value=location.href.split(/[?#]/)[0]+'#'+code;sh('fw',location.protocol=='file:');sh('menu',0);sh('lobby',1);rl()})}
+pe.on('error',e=>{dgl('Error: '+e.type+' '+(e.message||''));if(e.type=='unavailable-id')mkRoom();else{$('bh').disabled=false;toast(/network|socket|server/.test(e.type)?'The matchmaking server is unreachable – check your internet connection':'Network error: '+e.type)}});pe.on('disconnected',()=>pe.reconnect());pe.on('connection',c=>{dgl('Incoming connection');dgc(c,'Guest');hdcSetup(wrap(c))});pe.on('call',vcAns);
+pe.on('open',()=>{dgl('Matchmaking server OK, room: '+pe.id);L[0].pid=pe.id;$('rc').textContent=code;$('lk').value=location.href.split(/[?#]/)[0]+'#'+code;sh('fw',location.protocol=='file:');sh('menu',0);sh('lobby',1);rl()})}
 $('bh').onclick=async()=>{prep();await startMic();cfgV=1;isHost=true;me.id=0;L=[{id:0,name:me.name,an:me.an}];$('bh').disabled=true;mkRoom();startTick()};
 const startTick=()=>{try{const w=new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(0),50)'])));w.onmessage=tick}catch(e){setInterval(tick,50)}};
 $('bhm').onclick=async()=>{prep();await startMic();cfgV=1;isHost=true;me.id=0;L=[{id:0,name:me.name,an:me.an}];sh('menu',0);sh('lobby',1);sh('kl',0);$('kd').open=true;rl();startTick()};
-$('ki').onclick=async()=>{if(L.length>=8)return toast('Tele a szoba');try{const pc=new RTCPeerConnection(ICE);pend=pc;const dst=ctx().createMediaStreamDestination();pc._dst=dst;pc.addTrack(dst.stream.getAudioTracks()[0],dst.stream);pc.ontrack=e=>{pc._st=e.streams[0]||new MediaStream([e.track]);if(pc._id!=null)mixSrc(pc._id,pc._st)};hdcSetup(pc.createDataChannel('g'),pc);$('ko').value='Generálás…';await pc.setLocalDescription(await pc.createOffer());await gather(pc);$('ko').value=enc(pc.localDescription)}catch(e){toast('Nem sikerült a meghívó kód létrehozása')}};
-$('kc').onclick=async()=>{try{await pend.setRemoteDescription(dec($('kh').value));$('kh').value='';$('ko').value=''}catch(e){toast('Érvénytelen kód')}};
+$('ki').onclick=async()=>{if(L.length>=8)return toast('The room is full');try{const pc=new RTCPeerConnection(ICE);pend=pc;const dst=ctx().createMediaStreamDestination();pc._dst=dst;pc.addTrack(dst.stream.getAudioTracks()[0],dst.stream);pc.ontrack=e=>{pc._st=e.streams[0]||new MediaStream([e.track]);if(pc._id!=null)mixSrc(pc._id,pc._st)};hdcSetup(pc.createDataChannel('g'),pc);$('ko').value='Generating…';await pc.setLocalDescription(await pc.createOffer());await gather(pc);$('ko').value=enc(pc.localDescription)}catch(e){toast('Could not create the invite code')}};
+$('kc').onclick=async()=>{try{await pend.setRemoteDescription(dec($('kh').value));$('kh').value='';$('ko').value=''}catch(e){toast('Invalid code')}};
 $('kg').onclick=async()=>{prep();$('kg').disabled=true;await startMic();try{const pc=new RTCPeerConnection(ICE);
-pc.ontrack=e=>{const a=new Audio();a.srcObject=e.streams[0]||new MediaStream([e.track]);a.play().catch(()=>0)};pc.ondatachannel=e=>{hdc=e.channel;hdc.onopen=()=>{send(hdc,{t:'hi',name:me.name,an:me.an,pid:''});sh('menu',0);sh('lobby',1);rl()};hdc.onmessage=e=>cm(JSON.parse(e.data));hdc.onclose=()=>toast('A kapcsolat megszakadt – frissítsd az oldalt')};
-await pc.setRemoteDescription(dec($('kj').value));if(mst)pc.addTrack(mst.getAudioTracks()[0],mst);await pc.setLocalDescription(await pc.createAnswer());$('ka').value='Generálás…';await gather(pc);$('ka').value=enc(pc.localDescription)}catch(e){$('kg').disabled=false;toast('Érvénytelen kód')}};
+pc.ontrack=e=>{const a=new Audio();a.srcObject=e.streams[0]||new MediaStream([e.track]);a.play().catch(()=>0)};pc.ondatachannel=e=>{hdc=e.channel;hdc.onopen=()=>{send(hdc,{t:'hi',name:me.name,an:me.an,pid:''});sh('menu',0);sh('lobby',1);rl()};hdc.onmessage=e=>cm(JSON.parse(e.data));hdc.onclose=()=>toast('The connection was lost – refresh the page')};
+await pc.setRemoteDescription(dec($('kj').value));if(mst)pc.addTrack(mst.getAudioTracks()[0],mst);await pc.setLocalDescription(await pc.createAnswer());$('ka').value='Generating…';await gather(pc);$('ka').value=enc(pc.localDescription)}catch(e){$('kg').disabled=false;toast('Invalid code')}};
 $('bj').onclick=()=>{$('jp').hidden=false};
-$('bk').onclick=()=>{const c=$('rc').textContent;navigator.clipboard?navigator.clipboard.writeText(c).then(()=>toast('Kód másolva: '+c),()=>toast('Kód: '+c)):toast('Kód: '+c)};
-$('oc').oninput=()=>$('bg').textContent='Csatlakozás';fromLink();addEventListener('hashchange',fromLink);$('oc').onkeydown=e=>e.key=='Enter'&&$('bg').click();
-$('bi').onclick=()=>{const l=$('lk').value;navigator.clipboard?navigator.clipboard.writeText(l).then(()=>toast('Link másolva!'),()=>$('lk').select()):$('lk').select()};
-$('bg').onclick=async()=>{prep();const code=$('oc').value.trim().split(/[#=\/]/).pop().toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length<4)return toast('Add meg a szobakódot');$('bg').disabled=true;await startMic();const to=setTimeout(()=>{if(!hdc||hdc.readyState!='open'){$('bg').disabled=false;toast(sgo?'A párosító szerver elérhető, de a közvetlen kapcsolat nem épült fel (hálózat/NAT). Próbáld mobil hotspotról, vagy adj meg TURN-szervert a menüben (Haladó).':'A párosító szerver (0.peerjs.com) nem érhető el – próbáld újra később.');try{pe.destroy()}catch(e){}hdc=null}},20000);pe=new Peer(undefined,{config:ICE});
-pe.on('error',e=>{dgl('Hiba: '+e.type+' '+(e.message||''));clearTimeout(to);$('bg').disabled=false;toast(e.type=='peer-unavailable'?'Nincs ilyen szoba (vagy a házigazda kilépett)':/network|socket|server/.test(e.type)?'A párosító szerver nem érhető el – ellenőrizd a netkapcsolatot':'Hálózati hiba: '+e.type)});pe.on('call',vcAns);
-pe.on('open',()=>{sgo=1;dgl('Párosító szerver OK, kapcsolódás a szobához…');const cn=pe.connect('muu-'+code,{serialization:'json',reliable:true});dgc(cn,'Te');hdc=wrap(cn);hdc.onopen=()=>{clearTimeout(to);dgl('Adatcsatorna nyitva');send(hdc,{t:'hi',name:me.name,an:me.an,pid:pe.id});sh('menu',0);sh('lobby',1);rl()};hdc.onmessage=e=>cm(JSON.parse(e.data));hdc.onclose=()=>toast('A kapcsolat megszakadt – frissítsd az oldalt')})};
+$('bk').onclick=()=>{const c=$('rc').textContent;navigator.clipboard?navigator.clipboard.writeText(c).then(()=>toast('Code copied: '+c),()=>toast('Code: '+c)):toast('Code: '+c)};
+$('oc').oninput=()=>$('bg').textContent='Join';fromLink();addEventListener('hashchange',fromLink);$('oc').onkeydown=e=>e.key=='Enter'&&$('bg').click();
+$('bi').onclick=()=>{const l=$('lk').value;navigator.clipboard?navigator.clipboard.writeText(l).then(()=>toast('Link copied!'),()=>$('lk').select()):$('lk').select()};
+$('bg').onclick=async()=>{prep();const code=$('oc').value.trim().split(/[#=\/]/).pop().toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length<4)return toast('Enter the room code');$('bg').disabled=true;await startMic();const to=setTimeout(()=>{if(!hdc||hdc.readyState!='open'){$('bg').disabled=false;toast(sgo?'The matchmaking server is reachable, but the direct connection could not be established (network/NAT). Try a mobile hotspot, or enter a TURN server in the menu (Advanced).':'The matchmaking server (0.peerjs.com) is unreachable – try again later.');try{pe.destroy()}catch(e){}hdc=null}},20000);pe=new Peer(undefined,{config:ICE});
+pe.on('error',e=>{dgl('Error: '+e.type+' '+(e.message||''));clearTimeout(to);$('bg').disabled=false;toast(e.type=='peer-unavailable'?'No such room (or the host has left)':/network|socket|server/.test(e.type)?'The matchmaking server is unreachable – check your internet connection':'Network error: '+e.type)});pe.on('call',vcAns);
+pe.on('open',()=>{sgo=1;dgl('Matchmaking server OK, connecting to the room…');const cn=pe.connect('muu-'+code,{serialization:'json',reliable:true});dgc(cn,'You');hdc=wrap(cn);hdc.onopen=()=>{clearTimeout(to);dgl('Data channel open');send(hdc,{t:'hi',name:me.name,an:me.an,pid:pe.id});sh('menu',0);sh('lobby',1);rl()};hdc.onmessage=e=>cm(JSON.parse(e.data));hdc.onclose=()=>toast('The connection was lost – refresh the page')})};
 function hdcSetup(dc,pc){let id=null;
-dc.onmessage=e=>{const m=JSON.parse(e.data);if(m.t=='hi'&&id==null&&L.length<8&&G.ph=='lobby'){id=nid++;peers[id]=dc;if(pc){pc._id=id;mixAdd(id,pc)}L.push({id,name:String(m.name).slice(0,12),an:AN[m.an]?m.an:'cow',pid:String(m.pid||'')});send(dc,{t:'id',id,vc:cfgV});rl();bc({t:'lobby',L});for(const q in VB)for(const k in VB[q])sendv(dc,+q,k,VB[q][k])}else if(id!=null)hm(id,m);else if(m.t=='hi')send(dc,{t:'no'})};
-dc.onclose=()=>{if(id==null)return;delete peers[id];mixDel(id);L=L.filter(p=>p.id!=id);if(G.P[id]){G.P[id].alive=0;G.P[id].gone=1}if(G.ph=='lobby'){rl();bc({t:'lobby',L})}}}
-$('bs').onclick=()=>{G={ph:'x',P:{},A:[],order:L.map(p=>p.id),rd:0,nr:Math.min(L.length,4),seq:0};L.forEach(p=>G.P[p.id]={id:p.id,name:p.name,an:p.an,x:0,z:0,r:0,alive:1,flag:0,score:0,mooed:0,stun:0,cd:0});nextRound()};
-$('bn').onclick=()=>{G={ph:'lobby',P:{}};bc({t:'lobby',L});cm({t:'lobby',L})};
-function cm(m){if(m.t=='no'){toast('A szoba tele van, vagy már fut a játék');sh('lobby',0);sh('menu',1);$('bg').disabled=false}else if(m.t=='id'){me.id=m.id;cfgV=m.vc;}else if(m.t=='lobby'){L=m.L;S=null;sq=-1;clr();sh('hud',0);sh('hb',0);sh('ov',0);sh('menu',0);sh('lobby',1);rl()}else if(m.t=='s')ap(m);else if(m.t=='snd')snd(m.a,m.x,m.z,m.vo,m.w,m.ai);else if(m.t=='v')rv('v'+m.p+m.a,m,b=>sv(m.p,m.a,b));else if(m.t=='call')beep();else if(m.t=='ev')toast(m.m)}
+dc.onmessage=e=>{const m=JSON.parse(e.data);if(m.t=='hi'&&id==null&&L.length<8&&G.ph=='lobby'){id=nid++;peers[id]=dc;if(pc){pc._id=id;mixAdd(id,pc)}L.push({id,name:String(m.name).slice(0,12),an:AN[m.an]?m.an:'cow',pid:String(m.pid||'')});send(dc,{t:'id',id,vc:cfgV});rl();bc({t:'lobby',L,md:MODE});for(const q in VB)for(const k in VB[q])sendv(dc,+q,k,VB[q][k])}else if(id!=null)hm(id,m);else if(m.t=='hi')send(dc,{t:'no'})};
+dc.onclose=()=>{if(id==null)return;delete peers[id];mixDel(id);L=L.filter(p=>p.id!=id);if(G.P[id]){G.P[id].alive=0;G.P[id].gone=1}if(G.ph=='lobby'){rl();bc({t:'lobby',L,md:MODE})}}}
+$('bs').onclick=()=>{G={ph:'x',P:{},A:[],order:L.map(p=>p.id),rd:0,nr:Math.min(L.length,4),seq:0,md:MODE,perm:{},sk:0,sm:0,lt:0};L.forEach(p=>{const a=Object.keys(AN);for(let i=a.length-1;i>0;i--){const j=R()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}G.perm[p.id]=a});L.forEach(p=>G.P[p.id]={id:p.id,name:p.name,an:p.an,x:0,z:0,r:0,alive:1,flag:0,score:0,mooed:0,stun:0,cd:0});nextRound()};
+$('mds').onchange=()=>{MODE=$('mds').value;bc({t:'lobby',L,md:MODE});rl()};$('bn').onclick=()=>{G={ph:'lobby',P:{}};bc({t:'lobby',L,md:MODE});cm({t:'lobby',L,md:MODE})};
+function cm(m){if(m.t=='no'){toast('The room is full or the game is already running');sh('lobby',0);sh('menu',1);$('bg').disabled=false}else if(m.t=='id'){me.id=m.id;cfgV=m.vc;}else if(m.t=='lobby'){L=m.L;if(m.md)MODE=m.md;S=null;sq=-1;clr();sh('hud',0);sh('hb',0);sh('ov',0);sh('menu',0);sh('lobby',1);rl()}else if(m.t=='s')ap(m);else if(m.t=='snd')snd(m.a,m.x,m.z,m.vo,m.w,m.ai);else if(m.t=='v')rv('v'+m.p+m.a,m,b=>sv(m.p,m.a,b));else if(m.t=='call')beep();else if(m.t=='ev')toast(m.m)}
 const tint=(m,c)=>m.traverse(o=>o.material&&o.material.emissive&&o.material.emissive.setHex(c));
-/* ---------- host: játéklogika ---------- */
-const rp=(m=0)=>{let x,z;do{x=(R()-.5)*56;z=(R()-.5)*56}while(Math.hypot(x,z)<m);return[x,z]};
+/* ---------- host: game logic ---------- */
+const rp=(m=0)=>{let x,z;do{x=(R()-.5)*56;z=(R()-.5)*56}while(Math.hypot(x,z)<m||bad(x,z));return[x,z]};
 const snd2=(a,x,z,vo,w,ai)=>{bc({t:'snd',a,x,z,vo,w,ai});snd(a,x,z,vo,w,ai)},ev=m=>{bc({t:'ev',m});toast(m)};
-function nextRound(){G.rd++;{const o=G.order.filter(i=>!G.P[i].gone);G.hu=o[(G.rd-1)%o.length]}G.seq++;G.ph='hide';G.tm=5;G.call=0;G.nc=8;G.sec=0;G.msg='';G.mk=[];
-Object.values(G.P).forEach(p=>{p.alive=p.gone?0:1;p.nt=10+R()*10;p.call=0;p.spin=0;p.sw=0;p.mt=0;p.sl=0;p.sn=0;p.flag=0;p.stun=0;p.cd=0;if(p.id==G.hu){p.x=0;p.z=0}else{[p.x,p.z]=rp(8)}});
+function nextRound(){G.rd++;{const o=G.order.filter(i=>!G.P[i].gone);G.hu=o[(G.rd-1)%o.length]}G.seq++;G.sm=G.sk=Object.values(G.P).filter(p=>!p.gone).length;G.lt=0;G.ph='hide';G.tm=5;G.call=0;G.nc=8;G.sec=0;G.msg='';G.mk=[];
+Object.values(G.P).forEach(p=>{p.an=G.perm[p.id][(G.rd-1)%4];p.alive=p.gone?0:1;p.nt=10+R()*10;p.call=0;p.spin=0;p.sw=0;p.mt=0;p.sl=0;p.sn=0;p.flag=0;p.stun=0;p.cd=0;if(p.id==G.hu){p.x=0;p.z=0}else{[p.x,p.z]=rp(8)}});
 const T=Object.keys(AN),vp=G.order.filter(i=>VB[i]&&Object.keys(VB[i]).length>3);G.A=[];for(let i=0;i<16;i++){const q=rp(6);G.A.push({x:q[0],z:q[1],r:0,an:T[i%4],vo:vp.length?vp[R()*vp.length|0]:-1,tx:q[0],tz:q[1],w:R()*2,st:0,sn:0,nt:2+R()*23})}}
 function hm(id,m){const p=G.P[id];if(m.t=='p'&&p&&isFinite(m.x+m.z+m.r)){p.x=clamp(m.x);p.z=clamp(m.z);p.r=m.r;p.sl=m.s>=0&&m.s<5?m.s|0:0;p.q=m.q}else if(m.t=='moo')hmoo(id,m.l);else if(m.t=='sw'){if(p&&id==G.hu)p.sw=.4}else if(m.t=='mk')hmk(id,m.k,m.i);else if(m.t=='c')hcatch(id,m.r);else if(m.t=='v'&&AN[m.a])rv('v'+id+m.a,m,b=>vclip(id,m.a,b,id))}
 function hmoo(id,l){const p=G.P[id];if(!p||!p.alive||id==G.hu||(G.ph!='play'&&G.ph!='hide'))return;p.nt=10+R()*10;if(l)p.sn=Math.max(p.sn||0,.6);if(p.mt>0)return;p.mt=4;p.sn=1.8;if(!cfgV)snd2(p.an,p.x,p.z,id,id)}
-function hcatch(id,ry){if(G.ph!='play'||id!=G.hu)return;const h=G.P[id];if(h.cd>0||h.stun>0)return;h.cd=.8;ry=isFinite(ry)?ry:h.r;const fc=(x,z)=>{const q=Math.atan2(x-h.x,z-h.z)-ry;return Math.abs(Math.atan2(Math.sin(q),Math.cos(q)))<.9};let best=null,bd=3.2;
+function hcatch(id,ry){if(G.ph!='play'||id!=G.hu)return;const h=G.P[id];if(h.cd>0||h.stun>0)return;const lim=G.md=='lim';if(lim&&G.sk<=0)return;h.cd=.8;if(lim){G.sk--;if(G.sk<=0)G.lt=1.6}ry=isFinite(ry)?ry:h.r;const fc=(x,z)=>{const q=Math.atan2(x-h.x,z-h.z)-ry;return Math.abs(Math.atan2(Math.sin(q),Math.cos(q)))<.9};let best=null,bd=3.2;
 Object.values(G.P).forEach(p=>{if(p.id!=id&&p.alive){const d=Math.hypot(p.x-h.x,p.z-h.z);if(d<bd&&fc(p.x,p.z)){bd=d;best=p}}});
-G.A.forEach(a=>{if(a.st<=0){const d=Math.hypot(a.x-h.x,a.z-h.z);if(d<bd&&fc(a.x,a.z)){bd=d;best=a}}});if(!best)return;
-if(best.id!=null){best.alive=0;h.score+=100;ev('🎯 '+best.name+' elkapva! +100 a vadásznak')}else{best.st=3;h.score-=40;h.stun=2.5;ev('❌ Gépi állat volt! −40 pont és kábulat')}}
+G.A.forEach(a=>{if(a.st<=0){const d=Math.hypot(a.x-h.x,a.z-h.z);if(d<bd&&fc(a.x,a.z)){bd=d;best=a}}});if(!best){if(lim)ev('💨 The hunter missed! Swings left: '+G.sk);return}
+if(best.id!=null){best.alive=0;h.score+=100;ev('🎯 '+best.name+' caught! +100 for the hunter')}else{best.st=3;h.score-=40;h.stun=2.5;ev('❌ That was an AI animal! −40 points and stunned')}}
 function tick(){mixG();if(G.ph=='lobby')return;const dt=.05,P=Object.values(G.P),h0=G.P[0];if(h0&&sq==G.seq){h0.x=me.x;h0.z=me.z;h0.r=me.r;h0.sl=slot;h0.q=zm>.5?(zt?[zt.k,zt.i]:1):0}
 const hu=G.P[G.hu],hum=P.filter(p=>p.id!=G.hu&&p.alive);P.forEach(p=>{p.flag=Math.max(0,p.flag-dt);p.stun=Math.max(0,p.stun-dt);p.cd=Math.max(0,p.cd-dt);p.mc=Math.max(0,(p.mc||0)-dt);p.sn=Math.max(0,(p.sn||0)-dt);p.sw=Math.max(0,(p.sw||0)-dt);p.mt=Math.max(0,(p.mt||0)-dt)});G.mk=(G.mk||[]).map(q=>[q[0],q[1],q[2]-dt]).filter(q=>q[2]>0);
-if(G.ph=='hide'||G.ph=='play')G.A.forEach((a,ai)=>{a.st=Math.max(0,a.st-dt);a.sn=Math.max(0,a.sn-dt);if(a.st>0)return;if(a.w>0)a.w-=dt;else{const dx=a.tx-a.x,dz=a.tz-a.z,d=Math.hypot(dx,dz);if(d<.3){a.w=.5+R()*3;[a.tx,a.tz]=rp()}else{a.x+=dx/d*2.4*dt;a.z+=dz/d*2.4*dt;a.r=Math.atan2(dx,dz)}}if((a.nt-=dt)<=0){a.nt=15+R()*10;a.sn=1.8;snd2(a.an,a.x,a.z,a.vo,undefined,ai)}});
+if(G.ph=='hide'||G.ph=='play')G.A.forEach((a,ai)=>{a.st=Math.max(0,a.st-dt);a.sn=Math.max(0,a.sn-dt);if(a.st>0)return;if(a.w>0)a.w-=dt;else{if(Math.hypot(a.tx-a.x,a.tz-a.z)<.3){a.w=.5+R()*3;[a.tx,a.tz]=rp()}else{const q0=botAim(a),dx=q0[0]-a.x,dz=q0[1]-a.z,d=Math.hypot(dx,dz)||1,sp=2.4*dt*wf(a.x,a.z),ox=a.x,oz=a.z,q=colRes(a.x+dx/d*sp,a.z+dz/d*sp,.4);a.x=clamp(q[0]);a.z=clamp(q[1]);a.r=Math.atan2(dx,dz);a.pt=(a.pt||0)+dt;if(a.pt>1.6){a.pt=0;if(a.px!==undefined&&Math.hypot(a.x-a.px,a.z-a.pz)<.9){a.w=.3+R()*1;[a.tx,a.tz]=rp();a.gp=0}a.px=a.x;a.pz=a.z}if(Math.hypot(a.x-ox,a.z-oz)<sp*.3){a.w=.3+R()*1.5;[a.tx,a.tz]=rp()}}}if((a.nt-=dt)<=0){a.nt=15+R()*10;a.sn=1.8;snd2(a.an,a.x,a.z,a.vo,undefined,ai)}});
 if(G.ph=='hide'||G.ph=='play')hum.forEach(p=>{if(p.spin>0)p.spin-=dt;else if((p.nt-=dt)<=0){p.nt=10+R()*10;p.spin=2.5}});
 if(G.ph=='hide'){G.tm-=dt;if(G.tm<=0){G.ph='play';G.tm=75;G.nc=8}}
 else if(G.ph=='play'){G.tm-=dt;G.sec+=dt;if(G.sec>=1){G.sec=0;hum.forEach(p=>p.score++)}
-if(!hum.length||G.tm<=0||hu.gone){G.ph='end';G.tm=6;hum.forEach(p=>p.score+=20);G.msg=hum.length?'Az állatok túlélték! (+20 a túlélőknek)':'Minden állatot elkaptak!'}}
+if(G.lt>0)G.lt-=dt;const nsk=G.md=='lim'&&G.sk<=0&&G.lt<=0;if(!hum.length||G.tm<=0||hu.gone||nsk){G.ph='end';G.tm=6;hum.forEach(p=>p.score+=20);G.msg=hum.length?(nsk?'The hunter ran out of swings! ':'')+'The animals survived! (+20 for the survivors)':'All animals were caught!'}}
 else if(G.ph=='end'){G.tm-=dt;if(G.tm<=0){if(G.rd>=G.nr||P.filter(p=>!p.gone).length<2)G.ph='over';else nextRound()}}
-const f=n=>+n.toFixed(2),s={t:'s',ph:G.ph,rd:G.rd,nr:G.nr,tm:Math.ceil(G.tm),hu:G.hu,sq:G.seq,c:G.call>0?1:0,ca:G.ca,m:G.msg,
+const f=n=>+n.toFixed(2),s={t:'s',ph:G.ph,rd:G.rd,nr:G.nr,tm:Math.ceil(G.tm),hu:G.hu,sq:G.seq,md:G.md,sk:G.sk,sm:G.sm,c:G.call>0?1:0,ca:G.ca,m:G.msg,
 P:P.map(p=>[p.id,f(p.x),f(p.z),f(p.r),p.alive,+p.flag.toFixed(1),p.score,p.an,p.name,+p.stun.toFixed(1),+(p.sn||0).toFixed(1),+(p.spin||0).toFixed(1),p.sl||0,+(p.sw||0).toFixed(2)]),M:(G.mk||[]).map(q=>[q[0],q[1]]),A:G.A.map(a=>[f(a.x),f(a.z),f(a.r),a.an,a.st>0?1:0,+a.sn.toFixed(1)])};bc(s);ap(s)}
-/* ---------- kézi szoba: host-keverő ---------- */
+/* ---------- manual room: host mixer ---------- */
 const MX={S:{},D:{},G:{}};
 function mixAdd(id,pc){MX.D[id]=pc._dst;if(!MX.S[0]&&mst)mixSrc(0,mst);if(pc._st)mixSrc(id,pc._st);mixLink()}
 function mixSrc(id,st){const x=ctx();if(id){const a=new Audio();a.srcObject=st;a.muted=true;a.play().catch(()=>0)}const s=x.createMediaStreamSource(st);MX.S[id]=s;if(id){const g=x.createGain();s.connect(g);g.connect(x.destination);VG[id]=g}mixLink()}
 function mixLink(){const x=ctx();for(const y in MX.S)for(const d in MX.D)if(y!=d&&!MX.G[y+'_'+d]){const g=x.createGain();g.gain.value=0;MX.S[y].connect(g);g.connect(MX.D[d]);MX.G[y+'_'+d]=g}}
 function mixDel(id){delete VG[id];for(const k in MX.G){const[y,d]=k.split('_');if(y==id||d==id){try{MX.G[k].disconnect()}catch(e){}delete MX.G[k]}}try{MX.S[id]&&MX.S[id].disconnect()}catch(e){}delete MX.S[id];delete MX.D[id]}
-function audL(X,Y){const a=G.P[X],b=G.P[Y];if(!a||!b)return 0;if(X==G.hu&&a.q)return Array.isArray(a.q)&&a.q[0]==0&&a.q[1]==Y?1:0;return Math.max(0,1-Math.hypot(a.x-b.x,a.z-b.z)/(X==G.hu?7:35))}
+function audL(X,Y){const a=G.P[X],b=G.P[Y];if(!a||!b)return 0;if(X==G.hu&&a.q)return Array.isArray(a.q)&&a.q[0]==0&&a.q[1]==Y?1:0;return Math.max(0,1-Math.hypot(a.x-b.x,a.z-b.z)/(X==G.hu?HR:35))}
 function mixG(){for(const k in MX.G){const[y,d]=k.split('_');MX.G[k].gain.value=G.ph=='lobby'?1:audL(+d,+y)}}
-/* ---------- élő chat, hallás, jelölés ---------- */
+/* ---------- live chat, hearing, marking ---------- */
 const SIL=14;
-const aud=(x,z,k,i)=>{if(hl&&zm>.5)return zt&&zt.k==k&&zt.i==i?1:0;return Math.max(0,1-Math.hypot(x-lx,z-lz)/(hl?7:35))};
+const aud=(x,z,k,i)=>{if(hl&&zm>.5)return zt&&zt.k==k&&zt.i==i?1:0;return Math.max(0,1-Math.hypot(x-lx,z-lz)/(hl?HR:35))};
 function vcSync(){if(!cfgV||!mst||!pe||pe.destroyed)return;L.forEach(q=>{if(q.id!=me.id&&q.pid&&!vcC[q.id]&&me.id<q.id)vcAtt(pe.call(q.pid,mst,{sdpTransform:OP,metadata:{p:me.id}}),q.id)})}
 function vcAns(c){if(!cfgV||!mst)return;c.answer(mst,{sdpTransform:OP});vcAtt(c,c.metadata&&c.metadata.p)}
 function vcAtt(c,id){if(id==null)return;vcC[id]=c;c.on('stream',st=>{const a=new Audio();a.srcObject=st;a.muted=true;a.play().catch(()=>0);const x=ctx(),g=x.createGain();x.createMediaStreamSource(st).connect(g);g.connect(x.destination);VG[id]=g});c.on('close',()=>{delete vcC[id];delete VG[id]})}
 function hmk(id,k,i){if(G.ph!='play'||id!=G.hu||(k!=0&&k!=1)||!isFinite(i))return;const h=G.P[id];if(h.mc>0)return;if(k==0&&!(i!=id&&G.P[i]&&G.P[i].alive))return;if(k==1&&!G.A[i])return;h.mc=.6;const had=(G.mk||[]).some(q=>q[0]==k&&q[1]==i);G.mk=(G.mk||[]).filter(q=>!(q[0]==k&&q[1]==i));if(had)return;G.mk.push([k,i,15]);if(G.mk.length>4)G.mk.shift()}
 function markIt(){if(!S||S.hu!=me.id||S.ph!='play'||!zt)return;isHost?hmk(0,zt.k,zt.i):send(hdc,{t:'mk',k:zt.k,i:zt.i})}
-/* ---------- kliens: állapot + HUD ---------- */
+/* ---------- client: state + HUD ---------- */
 function ap(s){const e=s.P.find(p=>p[0]==me.id);
 if(!S||s.sq!=sq){sq=s.sq;clr();fp=s.hu==me.id?1:0;spT=-1;slot=0;scopeOn=0;swT=0;hbk='';if(e){me.x=e[1];me.z=e[2]}sh('lobby',0);sh('menu',0);sh('hud',1);document.activeElement&&document.activeElement.blur()}S=s;
-const mh=s.hu==me.id,al=e&&e[4];
-$('tp').textContent=`Kör ${s.rd}/${s.nr} · ⏱ ${s.tm}s · `+(mh?'🧑‍🌾 Te vagy a vadász · 1: kard, 2: távcső · bal klikk = használat, görgő = nagyítás':al?AN[me.an]+' Állat vagy · WASD · M (nyomva tartva) = élő hang':'Elkaptak – nézelődsz (Tab: játékosváltás, V: FPS)');
-sh('hb',!!al);hbR();$('ph').textContent=s.ph=='hide'?(mh?'Várj, az állatok szétszélednek… ':'Szélj szét és viselkedj állatként! ')+s.tm:'';
+const mh=s.hu==me.id,al=e&&e[4];if(e)me.an=e[7];
+$('tp').textContent=`Round ${s.rd}/${s.nr} · ⏱ ${s.tm}s · `+(mh?'🧑‍🌾 You are the hunter · 1: sword, 2: spyglass · left click = use, scroll = zoom':al?'You are a '+AN[me.an]+' '+NM[me.an]+' – say: '+PR[me.an]+' · WASD · hold M = live mic':'You were caught – spectating (Tab: switch player, V: first person)');
+sh('hb',!!al);hbR();{const k=$('sk'),on=s.md=='lim';k.hidden=!on;if(on){const kh=Array.from({length:s.sm},(_,i)=>`<span${i<s.sk?'':' class="u"'}>🗡️</span>`).join('')+` <small>swings: ${s.sk}/${s.sm}</small>`;if(k._h!=kh){k._h=kh;k.innerHTML=kh}}}$('ph').textContent=s.ph=='hide'?(mh?'Wait, the animals are scattering… ':'🎲 This round you are a '+AN[me.an]+' '+NM[me.an]+' ('+PR[me.an]+')! Scatter! ')+s.tm:'';
 const sb=[...s.P].sort((a,b)=>b[6]-a[6]).map(p=>`<div${p[0]==me.id?' class="me"':''}>${AN[p[7]]} ${esc(p[8])}${p[0]==s.hu?' 🧑‍🌾':''}${p[4]?'':' ✖'} <b>${p[6]}</b></div>`).join('');$('sb').innerHTML=sb;
-if((s.M||[]).some(q=>q[0]==0&&q[1]==me.id))$('tp').textContent+=' · 🚩 MEGJELÖLTEK!';const ov=s.ph=='end'||s.ph=='over';sh('ov',ov);if(ov&&document.pointerLockElement)document.exitPointerLock();if(ov){const w=[...s.P].sort((a,b)=>b[6]-a[6])[0];$('ot').textContent=s.ph=='over'?'🏆 Játék vége – győztes: '+w[8]:'Kör vége';$('om').textContent=s.m;$('os').innerHTML=sb;$('bn').hidden=!(isHost&&s.ph=='over')}}
+if((s.M||[]).some(q=>q[0]==0&&q[1]==me.id))$('tp').textContent+=' · 🚩 YOU ARE MARKED!';const ov=s.ph=='end'||s.ph=='over';sh('ov',ov);if(ov&&document.pointerLockElement)document.exitPointerLock();if(ov){const w=[...s.P].sort((a,b)=>b[6]-a[6])[0];$('ot').textContent=s.ph=='over'?'🏆 Game over – winner: '+w[8]:'Round over';$('om').textContent=s.m;$('os').innerHTML=sb;$('bn').hidden=!(isHost&&s.ph=='over')}}
 /* ---------- 3D ---------- */
 const cv=$('c'),rd=new THREE.WebGLRenderer({canvas:cv,antialias:true}),sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(55,1,.1,200),clock=new THREE.Clock();
-sc.background=new THREE.Color(0x9fd8ff);sc.fog=new THREE.Fog(0x9fd8ff,40,90);sc.add(new THREE.HemisphereLight(0xffffff,0x6a9a4a,.9));const dl=new THREE.DirectionalLight(0xffffff,.6);dl.position.set(10,20,5);sc.add(dl);
-const bx=(w,h,d,c,x=0,y=0,z=0)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshLambertMaterial({color:c}));m.position.set(x,y,z);return m};
-const gr=new THREE.Mesh(new THREE.PlaneGeometry(70,70),new THREE.MeshLambertMaterial({color:0x7ec850}));gr.rotation.x=-Math.PI/2;sc.add(gr);
-sc.add(bx(66,.8,.3,0x8b5a2b,0,.4,33),bx(66,.8,.3,0x8b5a2b,0,.4,-33),bx(.3,.8,66,0x8b5a2b,33,.4,0),bx(.3,.8,66,0x8b5a2b,-33,.4,0));
-for(let i=0;i<26;i++){const x=(R()-.5)*64,z=(R()-.5)*64;if(Math.hypot(x,z)>6)sc.add(bx(.5,2,.5,0x6b4a2b,x,1,z),bx(2,2,2,0x2f8f3a,x,3,z))}
+sc.background=new THREE.Color(0xbfdcef);rd.shadowMap.enabled=true;rd.shadowMap.type=THREE.PCFSoftShadowMap;rd.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
+const bx=(w,h,d,c,x=0,y=0,z=0)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshLambertMaterial({color:c}));m.position.set(x,y,z);m.castShadow=true;return m};
+/* ===== WORLD: layout (seeded, identical on every client) ===== */
+const WR=(s=>()=>{s=s+1831565813|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296})(20241021);
+const ss=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)};
+const h3=(a,b,c)=>{let h=Math.imul(a|0,374761393)^Math.imul(b|0,668265263)^Math.imul(c|0,1274126177);h=Math.imul(h^h>>>13,1103515245);return((h^h>>>16)>>>0)/4294967296};
+const vn=(x,z)=>{const xi=Math.floor(x),zi=Math.floor(z),fx=x-xi,fz=z-zi,u=fx*fx*(3-2*fx),v=fz*fz*(3-2*fz),a=h3(xi,zi,7),b=h3(xi+1,zi,7),c=h3(xi,zi+1,7),d=h3(xi+1,zi+1,7);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v};
+const rz=x=>-12+4*Math.sin(x*.1)+1.5*Math.sin(x*.27+1),rw=x=>3.4+.8*Math.sin(x*.19+2);
+const BRX0=7,BRX1=9.6,BRZ=rz(8.3),BRH=rw(8.3)+1.3;
+const onBr=(x,z)=>x>BRX0&&x<BRX1&&Math.abs(z-BRZ)<BRH,inW=(x,z)=>Math.abs(z-rz(x))<rw(x)-.2;
+const hAt=(x,z)=>-.6*ss(rw(x)+1.2,0,Math.abs(z-rz(x)))*(1-ss(30,37,Math.abs(x)));
+const gy=(x,z)=>onBr(x,z)?.12:hAt(x,z),wf=(x,z)=>inW(x,z)&&!onBr(x,z)?.55:1;
+const COL=[],BOX=[],PX0=-27,PX1=-5,PZ0=10,PZ1=27.5,GX=-16,GW=1.5,BARN={x:-16,z:21.5,w:10,d:6.5};
+BOX.push({x0:BARN.x-BARN.w/2,x1:BARN.x+BARN.w/2,z0:BARN.z-BARN.d/2,z1:BARN.z+BARN.d/2},{x0:-25.3,x1:-22.9,z0:13.2,z1:14});
+[[PX0,PZ0,PX0,PZ1],[PX1,PZ0,PX1,PZ1],[PX0,PZ1,PX1,PZ1],[PX0,PZ0,GX-GW,PZ0],[GX+GW,PZ0,PX1,PZ0]].forEach(([a,b,c,d])=>BOX.push({x0:Math.min(a,c)-.1,x1:Math.max(a,c)+.1,z0:Math.min(b,d)-.1,z1:Math.max(b,d)+.1}));
+const HAY=[[-8.5,13.2],[-8.5,14.7],[-24.8,24.6],[-23.3,25.2]];HAY.forEach(([x,z])=>COL.push({x,z,r:.75}));
+const inPen=(x,z,m=0)=>x>PX0-m&&x<PX1+m&&z>PZ0-m&&z<PZ1+m;
+const TR=[],BU=[],RK=[],nearC=(x,z,m)=>TR.some(t=>Math.hypot(t.x-x,t.z-z)<m);
+for(let i=0;i<600&&TR.length<64;i++){const x=(WR()-.5)*60,z=(WR()-.5)*60,t=WR()<.6?0:1,s=.8+WR()*.5,r=WR()*6.28;if(Math.hypot(x,z)<7||Math.abs(z-rz(x))<rw(x)+2.6||inPen(x,z,2.5)||(x>4&&x<12&&Math.abs(z-BRZ)<9)||nearC(x,z,3.4))continue;TR.push({x,z,t,s,r});COL.push({x,z,r:.5*s})}
+for(let i=0;i<400&&BU.length<80;i++){const x=(WR()-.5)*62,z=(WR()-.5)*62,s=.7+WR()*.7,k=WR();if(Math.hypot(x,z)<4||Math.abs(z-rz(x))<rw(x)+.8||inPen(x,z,.5)||nearC(x,z,1.6)||(x>5.5&&x<11.5&&Math.abs(z-BRZ)<8))continue;BU.push({x,z,s,k})}
+for(let i=0;i<16;i++){const x=(WR()-.5)*60,sd=WR()<.5?-1:1,z=rz(x)+sd*(rw(x)+.3+WR()*1.6),s=.45+WR()*.8;if(Math.abs(x-8.3)<3.2||inPen(x,z,1)||Math.abs(z)>30)continue;RK.push({x,z,s});COL.push({x,z,r:.62*s})}
+const bad=(x,z)=>COL.some(c=>Math.hypot(c.x-x,c.z-z)<c.r+.8)||BOX.some(b=>x>b.x0-.8&&x<b.x1+.8&&z>b.z0-.8&&z<b.z1+.8);
+const solid=(x,z)=>COL.some(c=>Math.hypot(c.x-x,c.z-z)<c.r)||BOX.some(b=>x>b.x0&&x<b.x1&&z>b.z0&&z<b.z1);
+const colRes=(x,z,r)=>{for(let k=0;k<2;k++){for(const c of COL){const dx=x-c.x,dz=z-c.z,rr=c.r+r,d2=dx*dx+dz*dz;if(d2<rr*rr){const d=Math.sqrt(d2)||.001;x=c.x+dx/d*rr;z=c.z+dz/d*rr}}
+for(const b of BOX){const qx=Math.max(b.x0,Math.min(x,b.x1)),qz=Math.max(b.z0,Math.min(z,b.z1)),dx=x-qx,dz=z-qz,d2=dx*dx+dz*dz;if(d2<r*r){if(d2>1e-8){const d=Math.sqrt(d2);x=qx+dx/d*r;z=qz+dz/d*r}else{const l=x-b.x0,rt=b.x1-x,t=z-b.z0,bt=b.z1-z,m=Math.min(l,rt,t,bt);if(m==l)x=b.x0-r;else if(m==rt)x=b.x1+r;else if(m==t)z=b.z0-r;else z=b.z1+r}}}}return[x,z]};
+const GO=[GX,PZ0-1.9],GI=[GX,PZ0+1.9],botAim=a=>{const pi=inPen(a.x,a.z),pt=inPen(a.tx,a.tz);if(pi==pt){a.gp=0;return[a.tx,a.tz]}const A=pi?GI:GO,B=pi?GO:GI;if(!a.gp&&Math.hypot(a.x-A[0],a.z-A[1])<.7)a.gp=1;return a.gp?B:A};
+let wAnim=()=>{};
+/* ===== WORLD: visuals (simple fallback map on error) ===== */
+try{
+const WT={value:0},M4=new THREE.Matrix4(),QQ=new THREE.Quaternion(),VV=new THREE.Vector3(),SS=new THREE.Vector3(),EE=new THREE.Euler();
+const tf=(x,y,z,sx=1,sy=1,sz=1,rx=0,ry=0,rz2=0)=>M4.clone().compose(VV.set(x,y,z),QQ.setFromEuler(EE.set(rx,ry,rz2)),SS.set(sx,sy,sz));
+const mkBag=()=>({p:[],n:[],c:[]});
+const addG=(bg,geo,m4,col)=>{const g=geo.index?geo.toNonIndexed():geo.clone();g.applyMatrix4(m4);const p=g.attributes.position.array,n=g.attributes.normal.array,fn=typeof col=='function';for(let i=0;i<p.length;i+=3){bg.p.push(p[i],p[i+1],p[i+2]);bg.n.push(n[i],n[i+1],n[i+2]);const k=fn?col(p[i],p[i+1],p[i+2]):col;bg.c.push(k.r,k.g,k.b)}g.dispose()};
+const bagGeo=bg=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(bg.p,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(bg.n,3));g.setAttribute('color',new THREE.Float32BufferAttribute(bg.c,3));return g};
+const bump=(g,a,seed)=>{const p=g.attributes.position;for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),k=1+a*(h3(Math.round(x*40),Math.round(y*40),Math.round(z*40)+seed)-.5);p.setXYZ(i,x*k,y*k,z*k)}return g};
+const cvs=(w,h,f)=>{const c=document.createElement('canvas');c.width=w;c.height=h;f(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;return t};
+const wLeaf=mkBag(),wSolid=mkBag(),CC=h=>new THREE.Color(h);
+/* lights, fog, sky */
+sc.fog=new THREE.Fog(0xcfe0ea,48,135);
+sc.add(new THREE.HemisphereLight(0xcfe6ff,0x6f8a45,.72));
+const sun=new THREE.DirectionalLight(0xfff0d2,1.05);sun.position.set(28,46,16);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);{const q=sun.shadow.camera;q.left=-44;q.right=44;q.top=44;q.bottom=-44;q.near=1;q.far=140;q.updateProjectionMatrix()}sun.shadow.bias=-.0006;sun.shadow.normalBias=.04;sc.add(sun);
+const fill=new THREE.DirectionalLight(0xaec6ff,.22);fill.position.set(-20,14,-18);sc.add(fill);
+{const sg=new THREE.SphereGeometry(160,24,14),sp0=sg.attributes.position,skc=[],cz=CC(0x4a86d0),ch=CC(0xdbe8ef),cf=CC(0xcfe0ea);
+for(let i=0;i<sp0.count;i++){const y=sp0.getY(i)/160,c=y>0?ch.clone().lerp(cz,Math.pow(Math.min(1,y*1.5),.7)):cf.clone();skc.push(c.r,c.g,c.b)}
+sg.setAttribute('color',new THREE.Float32BufferAttribute(skc,3));const sky=new THREE.Mesh(sg,new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.BackSide,fog:false,depthWrite:false}));sky.renderOrder=-2;sc.add(sky)}
+const cT=cvs(128,64,(g,w,h)=>{for(let i=0;i<8;i++){const x=22+R()*84,y=22+R()*20,r=12+R()*14,gr=g.createRadialGradient(x,y,1,x,y,r);gr.addColorStop(0,'rgba(255,255,255,.9)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;g.beginPath();g.arc(x,y,r,0,7);g.fill()}});
+const clouds=[];for(let i=0;i<9;i++){const q=new THREE.Sprite(new THREE.SpriteMaterial({map:cT,transparent:true,depthWrite:false,fog:false,opacity:.9}));q.scale.set(70+R()*40,32+R()*14,1);q.position.set((R()-.5)*260,58+R()*22,-30-R()*90);sc.add(q);clouds.push(q)}
+{const sT=cvs(64,64,(g)=>{const gr=g.createRadialGradient(32,32,2,32,32,32);gr.addColorStop(0,'rgba(255,250,230,1)');gr.addColorStop(.3,'rgba(255,240,200,.6)');gr.addColorStop(1,'rgba(255,240,200,0)');g.fillStyle=gr;g.fillRect(0,0,64,64)});const sd=new THREE.Sprite(new THREE.SpriteMaterial({map:sT,transparent:true,depthWrite:false,fog:false}));sd.scale.set(40,40,1);sd.position.copy(sun.position).normalize().multiplyScalar(150);sc.add(sd)}
+/* ground: grass texture + vertex colors (mud along the bank, trampled dirt in the paddock) + riverbed */
+const gT=cvs(256,256,(g,w,h)=>{g.fillStyle='#88ad55';g.fillRect(0,0,w,h);for(let i=0;i<2600;i++){const x=R()*w,y=R()*h,l=3+R()*6,a=(R()-.5)*.9,k=R();g.strokeStyle=k<.4?'#6e973f':k<.75?'#9bbf63':'#7aa349';g.globalAlpha=.55;g.lineWidth=1+R();g.beginPath();g.moveTo(x,y);g.lineTo(x+Math.sin(a)*l,y-Math.cos(a)*l);g.stroke()}g.globalAlpha=1});gT.repeat.set(26,26);
+{const gg=new THREE.PlaneGeometry(76,76,152,152);gg.rotateX(-Math.PI/2);const gp=gg.attributes.position,gc=[],cA=CC(0x9ec36a),cB=CC(0x7fa24f),cD=CC(0xb5a35e),cM=CC(0x6e5a3c),cS=CC(0xa99a78),tc=new THREE.Color();
+for(let i=0;i<gp.count;i++){const x=gp.getX(i),z=gp.getZ(i);gp.setY(i,hAt(x,z));tc.copy(cA).lerp(cB,vn(x*.12,z*.12));tc.lerp(cD,Math.max(0,vn(x*.05+9,z*.05+3)-.62)*1.6);const d=Math.abs(z-rz(x)),w=rw(x),bank=1-ss(w-.2,w+1.6,d);tc.lerp(d<w?cM:cS,bank*(d<w?1:.75));if(inPen(x,z,0))tc.lerp(cD,.55);gc.push(tc.r,tc.g,tc.b)}
+gg.setAttribute('color',new THREE.Float32BufferAttribute(gc,3));gg.computeVertexNormals();const gm=new THREE.Mesh(gg,new THREE.MeshLambertMaterial({map:gT,vertexColors:true}));gm.receiveShadow=true;sc.add(gm)}
+[[0,-144,500,212],[0,144,500,212],[-144,0,212,76],[144,0,212,76]].forEach(([x,z,w,h])=>{const q=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshLambertMaterial({color:0x6d8f45}));q.rotation.x=-Math.PI/2;q.position.set(x,-.02,z);sc.add(q)});
+/* trees, bushes, rocks, grass (merged: few draw calls) */
+const BK=CC(0x5b4330),BK2=CC(0x3f2f22),bark=(px,py,pz)=>BK.clone().lerp(BK2,(Math.sin(py*9+px*5)*.5+.5)*.6);
+const oak=(x,z,s,r)=>{const h=gy(x,z);addG(wSolid,new THREE.CylinderGeometry(.17*s,.32*s,3.6*s,8),tf(x,h+1.8*s,z),bark);
+for(let i=0;i<3;i++){const a=r+i*2.1;addG(wSolid,new THREE.CylinderGeometry(.06*s,.13*s,1.9*s,6),tf(x+Math.cos(a)*.55*s,h+3.5*s,z+Math.sin(a)*.55*s,1,1,1,Math.sin(a)*.65,0,-Math.cos(a)*.65),bark)}
+const lc=new THREE.Color().setHSL(.25+R()*.06,.5,.27+R()*.07);
+for(let i=0;i<8;i++){const a=r+i*2.4,d=i?(.9+R()*.8)*s:0,by=h+(i?3.7+R()*1.6:4.9)*s,br=(1.2+R()*.7)*s;addG(wLeaf,bump(new THREE.IcosahedronGeometry(1,1),.38,i*13+(x|0)),tf(x+Math.cos(a)*d,by,z+Math.sin(a)*d,br,br*.85,br),(px,py)=>lc.clone().offsetHSL(0,0,(py-(by-br))/(2*br)*.22))}};
+const pine=(x,z,s)=>{const h=gy(x,z);addG(wSolid,new THREE.CylinderGeometry(.12*s,.26*s,5.2*s,7),tf(x,h+2.6*s,z),bark);const lc=new THREE.Color().setHSL(.33+R()*.03,.45,.17+R()*.05);
+for(let i=0;i<5;i++){const y=h+(1.7+i*1.05)*s,rr=(1.75-i*.3)*s;addG(wLeaf,bump(new THREE.ConeGeometry(rr,1.9*s,10),.18,i*7),tf(x,y+.9*s,z,1,1,1,0,R()*6,0),(px,py)=>lc.clone().offsetHSL(0,0,(py-y)/(2*s)*.12))}};
+const bush=(x,z,s,k)=>{const h=gy(x,z),lc=new THREE.Color().setHSL(.25+R()*.08,.5,.22+R()*.1),n=3+(R()*3|0);
+for(let i=0;i<n;i++){const a=R()*6.28,d=i?(.35+R()*.45)*s:0,r=(.5+R()*.3)*s;addG(wLeaf,bump(new THREE.IcosahedronGeometry(1,1),.4,i*5),tf(x+Math.cos(a)*d,h+r*.7,z+Math.sin(a)*d,r,r*.8,r),(px,py)=>lc.clone().offsetHSL(0,0,Math.max(0,(py-h)/(1.6*s))*.18))}
+if(k>.55){const fc=CC([0xf2f2f2,0xf5d33a,0xe45b8a,0xc0392b][(k*10|0)%4]);for(let i=0;i<7;i++){const a=R()*6.28,e=R()*1.1,d=(.6+R()*.3)*s;addG(wLeaf,new THREE.IcosahedronGeometry(.07,0),tf(x+Math.cos(a)*d*Math.cos(e),h+.45*s+Math.sin(e)*d*.7,z+Math.sin(a)*d*Math.cos(e)),fc)}}};
+const rock=(x,z,s)=>{const h=gy(x,z);addG(wSolid,bump(new THREE.IcosahedronGeometry(1,1),.5,Math.round(x*3)),tf(x,h+.25*s,z,s*1.1,s*.7,s,0,R()*6,0),(px,py)=>CC(0x8d8f8a).lerp(CC(0x6a6c68),R()*.4).offsetHSL(0,0,(py-h)*.06))};
+TR.forEach(t=>(t.t?pine:oak)(t.x,t.z,t.s,t.r));BU.forEach(b=>bush(b.x,b.z,b.s,b.k));RK.forEach(q=>rock(q.x,q.z,q.s));
+for(let i=0;i<130;i++){const a=R()*6.283,rr=41+R()*22,x=Math.cos(a)*rr,z=Math.sin(a)*rr;(R()<.7?pine:oak)(x,z,1+R()*.9,R()*6)}
+{const bl=new THREE.ConeGeometry(.05,.55,3,1,true);let n=0;for(let i=0;i<900&&n<450;i++){const x=(R()-.5)*66,z=(R()-.5)*66;if(inW(x,z)||solid(x,z)||onBr(x,z))continue;n++;const h=gy(x,z),gc=new THREE.Color().setHSL(.24+R()*.06,.5,.3+R()*.08);
+for(let j=0;j<5;j++)addG(wLeaf,bl,tf(x+(R()-.5)*.25,h+.25,z+(R()-.5)*.25,1,.6+R()*.9,1,(R()-.5)*.5,0,(R()-.5)*.5),(px,py)=>gc.clone().offsetHSL(0,0,(py-h)*.25))}
+const rc=CC(0x6f7f3c),rt=CC(0x5a3b22);for(let i=0;i<30;i++){const x=(R()-.5)*60,sd=R()<.5?-1:1,z=rz(x)+sd*(rw(x)+.1+R()*.7);if(Math.abs(x-8.3)<3.2||Math.abs(z)>30)continue;for(let j=0;j<4;j++){const px=x+(R()-.5)*.5,pz=z+(R()-.5)*.5,hh=1+R()*.6,tl=(R()-.5)*.25;addG(wLeaf,new THREE.CylinderGeometry(.015,.03,hh,4),tf(px,gy(px,pz)+hh/2,pz,1,1,1,tl,0,tl),rc);if(j<2)addG(wLeaf,new THREE.CylinderGeometry(.05,.05,.28,6),tf(px+tl*hh*.5,gy(px,pz)+hh,pz-tl*hh*.5,1,1,1,tl,0,tl),rt)}}}
+/* fence (entrance: GX±GW), bridge */
+const wd1=CC(0x8a6a45),wd2=CC(0x6f5233),wc=()=>wd1.clone().lerp(wd2,R()*.6),wPost=new THREE.BoxGeometry(.16,1.1,.16),wRail=new THREE.BoxGeometry(.07,.09,2.1);
+const fence=(x1,z1,x2,z2)=>{const len=Math.hypot(x2-x1,z2-z1),n=Math.max(1,Math.round(len/2.1)),dx=(x2-x1)/n,dz=(z2-z1)/n,ang=Math.atan2(dx,dz),sl=Math.hypot(dx,dz)/2.1;
+for(let i=0;i<=n;i++){const x=x1+dx*i,z=z1+dz*i;addG(wSolid,wPost,tf(x,gy(x,z)+.55,z),wc())}
+for(let i=0;i<n;i++){const x=x1+dx*(i+.5),z=z1+dz*(i+.5),h=gy(x,z);[.42,.82].forEach(y=>addG(wSolid,wRail,tf(x,h+y,z,1,1,sl,0,ang,0),wc()))}};
+fence(-33,-33,33,-33);fence(33,-33,33,33);fence(33,33,-33,33);fence(-33,33,-33,-33);
+fence(PX0,PZ0,PX0,PZ1);fence(PX1,PZ0,PX1,PZ1);fence(PX0,PZ1,PX1,PZ1);fence(PX0,PZ0,GX-GW,PZ0);fence(GX+GW,PZ0,PX1,PZ0);
+[GX-GW,GX+GW].forEach(x=>addG(wSolid,new THREE.BoxGeometry(.24,1.7,.24),tf(x,.85,PZ0),wd2));
+[.3,.62,.94].forEach(y=>addG(wSolid,wRail,tf(GX-GW+.7*Math.sin(-.6),y,PZ0+.7*Math.cos(-.6),1,1,1.4/2.1,0,-.6,0),wd1));
+{const z0=BRZ-BRH,len=BRH*2,n=Math.round(len/.3);for(let i=0;i<n;i++)addG(wSolid,new THREE.BoxGeometry(2.6,.08,.27),tf(8.3,.08,z0+(i+.5)*len/n),wc());
+[7.5,9.1].forEach(x=>addG(wSolid,new THREE.BoxGeometry(.2,.2,len),tf(x,-.05,BRZ),wd2));
+[7.1,9.5].forEach(x=>{for(let z=z0+.3;z<z0+len;z+=1.6)addG(wSolid,new THREE.BoxGeometry(.14,.9,.14),tf(x,.57,z),wd2);addG(wSolid,new THREE.BoxGeometry(.08,.1,len),tf(x,.98,BRZ),wd1)})}
+const leafMat=new THREE.MeshLambertMaterial({vertexColors:true});
+leafMat.onBeforeCompile=s=>{s.uniforms.uT=WT;s.vertexShader='uniform float uT;\n'+s.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\n float sw_=smoothstep(.25,5.,position.y);transformed.x+=sin(uT*1.3+position.x*.7+position.z*.5)*.07*sw_;transformed.z+=cos(uT*1.1+position.z*.6+position.x*.3)*.05*sw_;')};
+{const lm=new THREE.Mesh(bagGeo(wLeaf),leafMat);lm.castShadow=true;sc.add(lm);const sm=new THREE.Mesh(bagGeo(wSolid),new THREE.MeshLambertMaterial({vertexColors:true}));sm.castShadow=sm.receiveShadow=true;sc.add(sm)}
+/* barn */
+const bm=(w,h,d,m,x,y,z,rx=0,ry=0,rz2=0)=>{const q=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);q.position.set(x,y,z);q.rotation.set(rx,ry,rz2);q.castShadow=q.receiveShadow=true;sc.add(q);return q};
+const wallT=cvs(256,256,(g,w,h)=>{for(let i=0;i<16;i++){const k=.85+R()*.3;g.fillStyle='rgb('+(150*k|0)+','+(42*k|0)+','+(34*k|0)+')';g.fillRect(i*16,0,16,h);g.fillStyle='rgba(0,0,0,.35)';g.fillRect(i*16,0,1.5,h)}for(let i=0;i<500;i++){g.fillStyle='rgba(0,0,0,'+R()*.12+')';g.fillRect(R()*w,R()*h,1,6+R()*20)}});wallT.repeat.set(3,1.4);
+const roofT=cvs(256,256,(g)=>{for(let y=0;y<8;y++)for(let x=0;x<9;x++){const k=.8+R()*.4;g.fillStyle='rgb('+(78*k|0)+','+(82*k|0)+','+(90*k|0)+')';g.fillRect(x*32+(y%2)*16-16,y*32,32,32);g.strokeStyle='rgba(0,0,0,.45)';g.strokeRect(x*32+(y%2)*16-16,y*32,32,32)}});roofT.repeat.set(5,2);
+const wallM=new THREE.MeshStandardMaterial({map:wallT,roughness:.9}),roofM=new THREE.MeshStandardMaterial({map:roofT,roughness:.8}),trimM=new THREE.MeshStandardMaterial({color:0xf0ebe0,roughness:.8}),darkM=new THREE.MeshStandardMaterial({color:0x2a1d14,roughness:1}),woodM=new THREE.MeshStandardMaterial({color:0x7a5a38,roughness:.9}),strawM=new THREE.MeshStandardMaterial({color:0xd6b05a,roughness:1}),stoneM=new THREE.MeshStandardMaterial({color:0x8a8a84,roughness:1});
+{const X=BARN.x,Z=BARN.z,W=BARN.w,D=BARN.d,H=3.4,PK=2.2,gz=Z-D/2-.03;
+bm(W+.3,.35,D+.3,stoneM,X,.175,Z);bm(W,H,D,wallM,X,H/2+.1,Z);
+[-1,1].forEach(sd=>{const g2=new THREE.BufferGeometry();g2.setAttribute('position',new THREE.Float32BufferAttribute([0,0,-D/2,0,0,D/2,0,PK,0],3));g2.setAttribute('uv',new THREE.Float32BufferAttribute([0,0,1,0,.5,1],2));g2.setIndex([0,1,2]);g2.computeVertexNormals();const m2=new THREE.Mesh(g2,new THREE.MeshStandardMaterial({map:wallT,roughness:.9,side:THREE.DoubleSide}));m2.position.set(X+sd*W/2,H+.1,Z);m2.castShadow=true;sc.add(m2)});
+const pt=Math.atan2(PK,D/2),RL=Math.hypot(D/2,PK)+.55;[-1,1].forEach(s2=>bm(W+1,.2,RL,roofM,X,H+.1+PK/2+.12,Z+s2*D/4,s2*pt,0,0));bm(W+1.05,.18,.4,trimM,X,H+.1+PK+.2,Z);
+[[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([a,b])=>bm(.28,H,.28,trimM,X+a*W/2,H/2+.1,Z+b*D/2));
+bm(3.2,2.9,.12,trimM,X,1.55,gz-.02);bm(2.9,2.7,.14,darkM,X,1.5,gz-.04);[1,-1].forEach(s3=>bm(.14,3.9,.12,trimM,X,1.5,gz-.08,0,0,s3*.82));
+[-3.6,3.6].forEach(dx=>{bm(1.2,1.2,.12,trimM,X+dx,2.3,gz-.02);bm(.95,.95,.14,darkM,X+dx,2.3,gz-.04);bm(.07,.95,.16,trimM,X+dx,2.3,gz-.06);bm(.95,.07,.16,trimM,X+dx,2.3,gz-.06)});
+bm(.12,1.4,1.6,trimM,X+W/2+.04,H+.55,Z);bm(.14,1.15,1.35,darkM,X+W/2+.06,H+.55,Z);
+HAY.forEach(([x,z])=>{const q=new THREE.Mesh(new THREE.CylinderGeometry(.6,.6,1.2,16),strawM);q.rotation.z=Math.PI/2;q.position.set(x,.6,z);q.castShadow=q.receiveShadow=true;sc.add(q)});
+bm(2.4,.5,.8,woodM,-24.1,.3,13.6);bm(2.1,.05,.55,new THREE.MeshStandardMaterial({color:0x3a7f95,roughness:.1}),-24.1,.52,13.6)}
+/* river: two layers (moving wave surface + flow-direction foam streaks) */
+const nT=cvs(256,256,(g,w,h)=>{const id=g.createImageData(w,h),H=new Float32Array(w*h);for(let y=0;y<h;y++)for(let x=0;x<w;x++){const u=x/w*6.2832,v=y/h*6.2832;H[y*w+x]=Math.sin(u*2+Math.sin(v*3)*1.2)*.5+Math.sin(v*3+u)*.35+Math.sin(u*5-v*4)*.2+Math.sin(u*9+v*7)*.1}
+for(let y=0;y<h;y++)for(let x=0;x<w;x++){const l=H[y*w+(x+w-1)%w],r=H[y*w+(x+1)%w],up=H[((y+h-1)%h)*w+x],dn=H[((y+1)%h)*w+x],nx=(l-r)*3,ny=(up-dn)*3,len=Math.hypot(nx,ny,1),i=(y*w+x)*4;id.data[i]=(nx/len*.5+.5)*255;id.data[i+1]=(ny/len*.5+.5)*255;id.data[i+2]=(1/len*.5+.5)*255;id.data[i+3]=255}g.putImageData(id,0,0)});nT.repeat.set(1,1.5);
+const fT=cvs(256,128,(g,w,h)=>{for(let i=0;i<60;i++){const x=R()*w,y=R()*h,l=18+R()*40;g.strokeStyle='rgba(255,255,255,'+(.25+R()*.4)+')';g.lineWidth=1+R()*1.5;[-w,0,w].forEach(o=>{g.beginPath();g.moveTo(x+o,y);g.quadraticCurveTo(x+o+l/2,y+(R()-.5)*4,x+o+l,y);g.stroke()})}});fT.repeat.set(.5,2);
+{const wp=[],wu=[],wi=[],wn=[],N=76;for(let i=0;i<=N;i++){const x=-38+i,zc=rz(x),hw=rw(x)+.25;wp.push(x,-.1,zc-hw,x,-.1,zc+hw);wu.push(i/5,0,i/5,1);wn.push(0,1,0,0,1,0)}for(let i=0;i<N;i++){const a=i*2;wi.push(a,a+1,a+2,a+1,a+3,a+2)}
+const wg=new THREE.BufferGeometry();wg.setAttribute('position',new THREE.Float32BufferAttribute(wp,3));wg.setAttribute('normal',new THREE.Float32BufferAttribute(wn,3));wg.setAttribute('uv',new THREE.Float32BufferAttribute(wu,2));wg.setIndex(wi);
+const wMat=new THREE.MeshStandardMaterial({color:0x2c7f8e,roughness:.1,metalness:.05,transparent:true,opacity:.84,normalMap:nT,depthWrite:false});wMat.normalScale.set(.55,.55);
+const water=new THREE.Mesh(wg,wMat);water.renderOrder=1;sc.add(water);
+const foam=new THREE.Mesh(wg,new THREE.MeshBasicMaterial({map:fT,transparent:true,opacity:.6,depthWrite:false}));foam.position.y=.015;foam.renderOrder=2;sc.add(foam)}
+wAnim=dt=>{WT.value+=dt;nT.offset.x-=dt*.22;nT.offset.y+=dt*.03;fT.offset.x-=dt*.35;clouds.forEach(q=>{q.position.x+=dt*.9;if(q.position.x>150)q.position.x=-150})};
+}catch(e){console.error('world error',e);sc.fog=new THREE.Fog(0x9fd8ff,40,90);sc.add(new THREE.HemisphereLight(0xffffff,0x6a9a4a,.9));{const dl=new THREE.DirectionalLight(0xffffff,.6);dl.position.set(10,20,5);sc.add(dl)}{const gr=new THREE.Mesh(new THREE.PlaneGeometry(70,70),new THREE.MeshLambertMaterial({color:0x7ec850}));gr.rotation.x=-Math.PI/2;sc.add(gr)}}
+
+
+
 const ring=new THREE.Mesh(new THREE.RingGeometry(.9,1.1,24),new THREE.MeshBasicMaterial({color:0x00e5ff,side:2}));ring.rotation.x=-Math.PI/2;ring.position.y=.05;sc.add(ring);
 const kt=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');x.strokeStyle='#e00';x.lineWidth=6;x.lineCap='round';x.beginPath();x.arc(32,13,8,0,7);x.moveTo(32,22);x.lineTo(32,42);x.moveTo(15,30);x.lineTo(49,30);x.moveTo(32,42);x.lineTo(20,60);x.moveTo(32,42);x.lineTo(44,60);x.stroke();return new THREE.CanvasTexture(c)})();
 const snt=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');x.fillStyle='#ff9800';x.beginPath();x.arc(32,32,30,0,7);x.fill();x.font='34px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText('🔊',32,35);return new THREE.CanvasTexture(c)})();
 const pring=new THREE.Mesh(new THREE.RingGeometry(.9,1.2,24),new THREE.MeshBasicMaterial({color:0xa020ff,side:2}));pring.rotation.x=-Math.PI/2;pring.visible=false;sc.add(pring);
-/* ---------- eszköztár ---------- */
+/* ---------- hotbar ---------- */
 const IH=['sword','scope',null,null,null],IC={sword:'🗡️',scope:'🔭'},zf=()=>28-zw*22,sa=(u,i)=>u<.35?i+(-2.2-i)*u/.35:u<.65?-2.2+2.5*(u-.35)/.3:.3+(i-.3)*(u-.65)/.35;
-function mkHand(){const arm=new THREE.Group(),hd=new THREE.Group(),sw=new THREE.Group(),sp=new THREE.Group();arm.add(bx(.2,.65,.2,0xf1c27d,0,-.32,0));hd.position.y=-.65;
-sw.add(bx(.06,.06,.25,0x5d4037,0,0,0),bx(.34,.06,.08,0x8b5a2b,0,0,.14),bx(.07,.03,.95,0xcfd8dc,0,0,.65));sp.add(bx(.11,.11,.5,0x263238,0,0,.25),bx(.14,.14,.05,0x4fc3f7,0,0,.52));sw.visible=sp.visible=false;hd.add(sw,sp);arm.add(hd);return{arm,sw,sp}}
-function hdUpd(h,it,u,v){h.sw.visible=it=='sword';h.sp.visible=it=='scope';const i=it?-.6:-.1,a=u>=0?sa(u,i):i;h.arm.rotation.x=v?a-(it?.6:1):a}
-const vh=mkHand(),vg=new THREE.Group();vh.arm.position.set(-.38,0,0);vg.add(vh.arm);vg.position.set(0,-.15,-.2);vg.rotation.y=Math.PI;vg.visible=false;cam.add(vg);sc.add(cam);
+/* ---------- hunter: two hands, textured sword, spyglass ---------- */
+const ctex=(w,h,f,rep)=>{const c=document.createElement('canvas');c.width=w;c.height=h;f(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;if(rep)t.repeat.set(rep[0],rep[1]);return t};
+const bladeT=ctex(128,512,(g,w,h)=>{
+const gr=g.createLinearGradient(0,0,w,0);[[0,'#7d8892'],[.07,'#f6fafc'],[.2,'#c9d2d9'],[.42,'#a3aeb8'],[.5,'#6f7c87'],[.58,'#a3aeb8'],[.8,'#c9d2d9'],[.93,'#f6fafc'],[1,'#7d8892']].forEach(([o,c])=>gr.addColorStop(o,c));g.fillStyle=gr;g.fillRect(0,0,w,h);
+for(let i=0;i<900;i++){g.fillStyle='rgba('+(R()<.5?'255,255,255':'50,60,70')+','+(.03+R()*.1)+')';g.fillRect(R()*w,R()*h,.5+R()*1.3,10+R()*150)}
+g.fillStyle='rgba(30,40,50,.55)';g.fillRect(w*.485,h*.05,w*.03,h*.78);g.fillStyle='rgba(255,255,255,.35)';g.fillRect(w*.47,h*.05,w*.012,h*.78);
+g.strokeStyle='rgba(20,25,30,.25)';g.lineWidth=1;for(let i=0;i<14;i++){const x=R()*w,y=R()*h;g.beginPath();g.moveTo(x,y);g.lineTo(x+(R()-.5)*30,y+(R()-.5)*40);g.stroke()}
+const bt=g.createLinearGradient(0,h,0,h*.86);bt.addColorStop(0,'rgba(20,24,28,.55)');bt.addColorStop(1,'rgba(20,24,28,0)');g.fillStyle=bt;g.fillRect(0,h*.86,w,h*.14)});
+const goldT=ctex(64,64,(g,w,h)=>{const gr=g.createLinearGradient(0,0,w,h);[[0,'#8a6a1a'],[.3,'#f3d673'],[.5,'#c9a23a'],[.75,'#f8e594'],[1,'#8a6a1a']].forEach(([o,c])=>gr.addColorStop(o,c));g.fillStyle=gr;g.fillRect(0,0,w,h);for(let i=0;i<120;i++){g.fillStyle='rgba(0,0,0,'+R()*.08+')';g.fillRect(R()*w,R()*h,R()*8,1)}});
+const leatherT=ctex(64,64,(g,w,h)=>{g.fillStyle='#4a2d18';g.fillRect(0,0,w,h);for(let i=-h;i<w+h;i+=8){g.strokeStyle='rgba(15,8,3,.7)';g.lineWidth=2;g.beginPath();g.moveTo(i,0);g.lineTo(i+h,h);g.stroke();g.strokeStyle='rgba(150,100,60,.35)';g.lineWidth=1.2;g.beginPath();g.moveTo(i+3,0);g.lineTo(i+3+h,h);g.stroke()}for(let i=0;i<300;i++){g.fillStyle='rgba(0,0,0,'+R()*.15+')';g.fillRect(R()*w,R()*h,1,1)}},[2,3]);
+const bladeM=new THREE.MeshPhongMaterial({map:bladeT,specular:0xffffff,shininess:60,emissive:0x0a0e12,side:THREE.DoubleSide}),goldM=new THREE.MeshPhongMaterial({map:goldT,specular:0xffeeaa,shininess:55}),gripM=new THREE.MeshPhongMaterial({map:leatherT,specular:0x221100,shininess:10}),steelM=new THREE.MeshPhongMaterial({color:0x2b3640,specular:0x8899aa,shininess:60}),lensM=new THREE.MeshBasicMaterial({color:0x4fc3f7});
+/* blade: diamond cross-section with a tapered tip (flat shaded), +z = towards the tip */
+const bladeG=(()=>{const bl=.8,w=.05,t=.011,z0=.15,zs=z0+bl*.8,zt=z0+bl,ws=w*.9,U=[0,.5,1,.5],A=[[-w,0],[0,t],[w,0],[0,-t]].map(q=>[q[0],q[1],z0]),B=[[-ws,0],[0,t*.85],[ws,0],[0,-t*.85]].map(q=>[q[0],q[1],zs]),tp=[0,0,zt],pos=[],uv=[],tri=(a,ua,va,b,ub,vb,c,uc,vc)=>{pos.push(...a,...b,...c);uv.push(ua,va,ub,vb,uc,vc)};
+for(let i=0;i<4;i++){const j=(i+1)%4;tri(A[i],U[i],0,B[i],U[i],.8,B[j],U[j],.8);tri(A[i],U[i],0,B[j],U[j],.8,A[j],U[j],0);tri(B[i],U[i],.8,tp,.5,1,B[j],U[j],.8)}
+const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.computeVertexNormals();return g})();
+const swGrG=new THREE.CylinderGeometry(.024,.024,.26,12).rotateX(Math.PI/2),swGdG=new THREE.BoxGeometry(.36,.045,.06),swCapG=new THREE.SphereGeometry(.032,10,8),swPmG=new THREE.SphereGeometry(.042,12,10);
+function mkSword(){const g=new THREE.Group(),a=(geo,m,x,y,z)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);g.add(o)};
+a(swGrG,gripM,0,0,0);a(swGdG,goldM,0,0,.14);a(swCapG,goldM,-.18,0,.14);a(swCapG,goldM,.18,0,.14);a(swPmG,goldM,0,0,-.15);g.add(new THREE.Mesh(bladeG,bladeM));return g}
+function mkScope(){const g=new THREE.Group(),a=(geo,m,z)=>{const o=new THREE.Mesh(geo,m);o.position.z=z;g.add(o)},cyl=(r1,r2,l)=>new THREE.CylinderGeometry(r1,r2,l,14).rotateX(Math.PI/2);
+a(cyl(.04,.04,.3),steelM,0);a(cyl(.062,.05,.13),steelM,.2);a(cyl(.066,.066,.025),goldM,.14);a(cyl(.034,.034,.1),goldM,-.2);a(cyl(.045,.045,.02),goldM,-.255);
+const l=new THREE.Mesh(new THREE.CircleGeometry(.05,16),lensM);l.position.z=.266;g.add(l);return g}
+/* third-person rig: right arm (sword) + left arm, spyglass held in front with both hands */
+const mkArm=()=>{const a=new THREE.Group();a.add(bx(.2,.45,.2,0xc0392b,0,-.225,0),bx(.17,.2,.17,0xf1c27d,0,-.6,0));return a};
+function mkHand(){const arm=mkArm(),la=mkArm(),hd=new THREE.Group(),sw=mkSword(),sp=mkScope();hd.position.y=-.65;hd.add(sw);arm.add(hd);sw.visible=sp.visible=false;return{arm,la,sw,sp}}
+function hdUpd(h,it,u,w,ph){w=w||0;ph=ph||0;const sn=Math.sin(ph),sw=it=='sword';h.sw.visible=sw;h.sp.visible=it=='scope';
+if(it=='scope'){const b=Math.sin(ph*2)*.03*w;h.arm.rotation.set(-1.25+b,0,-.5);h.la.rotation.set(-1.25+b,0,.5);return}
+const i=it?-.6:-.1,a=u>=0?sa(u,i):i,ar=sw?(u>=0?0:.18):.75,lf=sw?.55:.75;
+h.arm.rotation.set(a+sn*ar*w,0,sw?0:-.04*w);h.la.rotation.set((sw?-.5-(u>=0?.4*Math.sin(u*Math.PI):0):-.1)-sn*lf*w,0,sw?.35:-.08)}
+/* first-person view model: own scene + camera, drawn on top (the sword can never clip into walls) */
+const vsc=new THREE.Scene(),vcam=new THREE.PerspectiveCamera(55,1,.05,10),vg=new THREE.Group();vg.visible=false;
+vsc.add(vg,new THREE.HemisphereLight(0xdfeeff,0x8a7a55,.95));{const dl=new THREE.DirectionalLight(0xfff2d8,1.1);dl.position.set(-.5,1,.8);vsc.add(dl)}
+rd.autoClear=false;
+const NZ=new THREE.Vector3(0,0,-1),VSR=new THREE.Vector3(.42,-.62,.05),VSL=new THREE.Vector3(-.42,-.62,.05),V3=a=>new THREE.Vector3(a[0],a[1],a[2]),_ma=new THREE.Matrix4(),_va=new THREE.Vector3(),_vb=new THREE.Vector3(),_vc=new THREE.Vector3();
+const fbox=(w,h,c)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,1),new THREE.MeshLambertMaterial({color:c}));vg.add(m);return m},mkA=()=>({sl:fbox(.125,.125,0xc0392b),sk:fbox(.095,.095,0xf1c27d),fi:fbox(.115,.105,0xf1c27d)});
+const FR=mkA(),FL=mkA(),FSW=mkSword(),FSP=mkScope();FSW.scale.setScalar(.62);FSP.scale.setScalar(.9);vg.add(FSW,FSP);
+function ori(q,f,r){_vc.copy(f).normalize();_va.copy(r).addScaledVector(_vc,-r.dot(_vc)).normalize();_vb.crossVectors(_va,_vc);_ma.makeBasis(_vb,_va,_vc);q.setFromRotationMatrix(_ma)}
+function seg(m,p,q){const d=_vb.copy(q).sub(p),ln=d.length();m.position.copy(p).add(q).multiplyScalar(.5);m.scale.set(1,1,ln);m.quaternion.setFromUnitVectors(NZ,d.divideScalar(ln))}
+function armP(a,S0,W){const d=W.clone().sub(S0).normalize();seg(a.sl,S0,S0.clone().lerp(W,.68));seg(a.sk,S0.clone().lerp(W,.64),W);seg(a.fi,W.clone().addScaledVector(d,-.06),W.clone().addScaledVector(d,.03))}
+/* sword swing keyframes in camera space: idle -> wind-up (upper right) -> slash (to the lower left) -> idle; the tip always stays inside the picture */
+const KS=[{h:[.30,-.27,-.60],f:[-.12,.40,-.48],r:[-.8,.1,.6]},{h:[.38,-.08,-.58],f:[.2,.7,-.6],r:[-.7,.2,.7]},{h:[-.02,-.30,-.66],f:[-.6,.2,-.77],r:[0,.9,.4]}],e3=x=>x*x*(3-2*x);
+function fpPose(u){if(u<0)return KS[0];let a,b,x;if(u<.35){a=KS[0];b=KS[1];x=e3(u/.35)}else if(u<.65){a=KS[1];b=KS[2];x=Math.pow((u-.35)/.3,1.6)}else{a=KS[2];b=KS[0];x=e3((u-.65)/.35)}const m=(p,q)=>p.map((v,i)=>v+(q[i]-v)*x);return{h:m(a.h,b.h),f:m(a.f,b.f),r:m(a.r,b.r)}}
+const FW={x:0,z:0,w:0,ph:0};
+function fpUpd(it,u,t,w,ph){w=w||0;ph=ph||0;const bob=Math.sin(t*1.7)*.005*(1-w),sn=Math.sin(ph),b2=Math.sin(ph*2)*.012*w,s=u>=0?Math.sin(u*Math.PI):0,gz=1-Math.min(1,s*3);let rh,lh;FSW.visible=it=='sword';FSP.visible=it=='scope';
+if(it=='sword'){const k=fpPose(u),kf=V3(k.f);kf.x+=.05*sn*w*gz;rh=V3(k.h);rh.x+=.012*sn*w*gz;rh.y+=bob+b2+.02*sn*w*gz;lh=new THREE.Vector3(-.30+.12*s,-.29+bob+.05*s+b2-.05*sn*w,-.58+.09*sn*w);FSW.position.copy(rh);ori(FSW.quaternion,kf,V3(k.r))}
+else if(it=='scope'){const q=b2*.5;rh=new THREE.Vector3(.09,-.23+bob+q,-.62);lh=new THREE.Vector3(-.03,-.23+bob+q,-.9);FSP.position.set(.03,-.17+bob+q,-.8);ori(FSP.quaternion,new THREE.Vector3(0,.03,-1),new THREE.Vector3(0,1,0))}
+else{rh=new THREE.Vector3(.30,-.30+bob+.1*s+b2+.05*sn*w,-.56-.18*s-.09*sn*w);lh=new THREE.Vector3(-.30,-.30+bob+b2-.05*sn*w,-.56+.09*sn*w)}
+armP(FR,VSR,rh);armP(FL,VSL,lh)}
+/* other players' sword swishes (the hunter's swing timer rising edge) */
+const swp={};
+function swHear(p){const id=p[0],v0=swp[id]||0;swp[id]=p[13]||0;if(id==me.id||!(p[13]>.15&&v0<.05)||IH[p[12]]!='sword')return;const dx=p[1]-lx,dz=p[2]-lz,d=Math.hypot(dx,dz),v=Math.max(0,1-d/(hl?HR:35));if(v>0)swish(1.5*v,Math.max(-1,Math.min(1,(dz*Math.sin(cy)-dx*Math.cos(cy))/Math.max(1,d))))}
+
 function hbR(){const mh=!!S&&S.hu==me.id,k=(mh?1:0)+'_'+slot;if(k==hbk)return;hbk=k;$('hb').innerHTML=[0,1,2,3,4].map(i=>`<div${i==slot?' class="on"':''}><b>${i+1}</b>${mh&&IH[i]?IC[IH[i]]:''}</div>`).join('')}
 function selSlot(i){slot=i;scopeOn=0;hbR()}
-function useItem(){if(!S||S.hu!=me.id)return;const it=IH[slot];if(it=='scope'){scopeOn=!scopeOn;return}if(swT>0)return;swT=.4;isHost?(G.P[0]&&(G.P[0].sw=.4)):send(hdc,{t:'sw'});if(it=='sword')catchIt()}
+function useItem(){if(!S||S.hu!=me.id)return;const it=IH[slot];if(it=='scope'){scopeOn=!scopeOn;return}if(swT>0)return;if(it=='sword'&&S.md=='lim'&&S.sk<=0){toast('You ran out of swings!');return}swT=.4;isHost?(G.P[0]&&(G.P[0].sw=.4)):send(hdc,{t:'sw'});if(it=='sword'){swish(1.4,0);catchIt()}}
 function mk(t,hu){const g=new THREE.Group();
-if(hu){const hh=mkHand();hh.arm.position.set(.45,1.5,0);g.userData.h=hh;g.add(hh.arm)}if(hu)g.add(bx(.7,1.1,.5,0xc0392b,0,1,0),bx(.45,.45,.45,0xf1c27d,0,1.85,0),bx(1,.08,1,0x6b4a2b,0,2.1,0),bx(.4,.25,.4,0x6b4a2b,0,2.25,0),bx(.25,.7,.25,0x2c3e50,-.18,.35,0),bx(.25,.7,.25,0x2c3e50,.18,.35,0));
+if(hu){const hh=mkHand();hh.arm.position.set(.45,1.5,0);hh.la.position.set(-.45,1.5,0);hh.sp.position.set(0,1.32,.68);g.userData.h=hh;g.add(hh.arm,hh.la,hh.sp)}if(hu)g.add(bx(.7,1.1,.5,0xc0392b,0,1,0),bx(.45,.45,.45,0xf1c27d,0,1.85,0),bx(1,.08,1,0x6b4a2b,0,2.1,0),bx(.4,.25,.4,0x6b4a2b,0,2.25,0),bx(.25,.7,.25,0x2c3e50,-.18,.35,0),bx(.25,.7,.25,0x2c3e50,.18,.35,0));
 else{const[c,n,s]={cow:[0xffffff,0xffb6c1,1],chicken:[0xfafafa,0xf5b800,.55],pig:[0xf6a6b8,0xf08aa0,.9],sheep:[0xf2f2e6,0x333333,.95]}[t],sw=t=='sheep';
 g.add(bx(.9*s,.7*s,1.4*s,c,0,.9*s,0),bx(.6*s,.55*s,.6*s,sw?0x333333:c,0,1.15*s,.85*s),bx(.35*s,.2*s,.25*s,n,0,1.05*s,1.2*s));
 if(t=='cow')g.add(bx(.92,.4,.5,0x222222,0,1.1,.1),bx(.5,.3,.5,0x222222,0,1.2,-.5));
@@ -215,32 +381,32 @@ if(t=='chicken')g.add(bx(.08,.15,.2,0xe02424,0,.98,.47));
 [-1,1].forEach(a=>[-1,1].forEach(b=>g.add(bx(.18*s,.5*s,.18*s,0x444444,a*.3*s,.25*s,b*.5*s))))}
 const f=bx(.3,.3,.3,0xff2bd6,0,2.8,0);f.visible=false;g.userData.f=f;g.add(f);const kk=new THREE.Sprite(new THREE.SpriteMaterial({map:kt,depthTest:false}));kk.scale.set(1.3,1.3,1);kk.position.y=3.7;kk.visible=false;g.userData.k=kk;g.add(kk);const ss=new THREE.Sprite(new THREE.SpriteMaterial({map:snt,depthTest:false}));ss.scale.set(.9,.9,1);ss.position.y=2.4;ss.visible=false;g.userData.s=ss;g.add(ss);return g}
 function clr(){[pm,am].forEach(o=>{for(const k in o)sc.remove(o[k]);});pm={};am={}}
-function upd(m,x,z,r,dt,sp){const dx=x-m.position.x,dz=z-m.position.z,k=Math.min(1,dt*12);m.position.x+=dx*k;m.position.z+=dz*k;if(sp)m.rotation.y+=dt*12.57;else{let dr=r-m.rotation.y;dr=Math.atan2(Math.sin(dr),Math.cos(dr));m.rotation.y+=dr*k}m.position.y=Math.hypot(dx,dz)>.02?Math.abs(Math.sin(performance.now()/90))*.1:0}
+function upd(m,x,z,r,dt,sp){const dx=x-m.position.x,dz=z-m.position.z,k=Math.min(1,dt*12);m.position.x+=dx*k;m.position.z+=dz*k;if(sp)m.rotation.y+=dt*12.57;else{let dr=r-m.rotation.y;dr=Math.atan2(Math.sin(dr),Math.cos(dr));m.rotation.y+=dr*k}m.position.y=gy(m.position.x,m.position.z)+(Math.hypot(dx,dz)>.02?Math.abs(Math.sin(performance.now()/90))*.1:0)}
 function move(dt){const e=S.P.find(p=>p[0]==me.id);if(!e||!e[4])return;const mh=S.hu==me.id;if((mh&&(S.ph!='play'||e[9]>0))||S.ph=='end'||S.ph=='over')return;
 const fw=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0),st=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0);
-if(fw||st){const l=Math.hypot(fw,st),vx=(Math.sin(cy)*fw-Math.cos(cy)*st)/l,vz=(Math.cos(cy)*fw+Math.sin(cy)*st)/l,v=(mh?4.6:3.2)*dt;me.x=clamp(me.x+vx*v);me.z=clamp(me.z+vz*v);me.r=fp?cy:Math.atan2(vx,vz)}else if(fp)me.r=cy}
-function frame(){requestAnimationFrame(frame);const dt=Math.min(.1,clock.getDelta());
-if(S){const ms=new Set((S.M||[]).map(q=>q[0]+'_'+q[1]));S.P.forEach(p=>{const id=p[0];let m=pm[id];if(!m){m=pm[id]=mk(p[7],id==S.hu);sc.add(m);m.position.set(p[1],0,p[2])}
-m.visible=!!p[4];{const spn=p[11]>0;id==me.id?upd(m,me.x,me.z,me.r,dt,spn):upd(m,p[1],p[2],p[3],dt,spn);const hh=m.userData.h;if(hh){const m2=id==me.id,u=m2?(swT>0?1-swT/.4:-1):(p[13]>0?1-p[13]/.4:-1);hdUpd(hh,IH[m2?slot:p[12]],u,0)}}m.userData.f.visible=p[5]>0;m.userData.s.visible=p[10]>0;m.userData.k.visible=ms.has('0_'+id);m.rotation.z=p[9]>0?.5:0});
+if(fw||st){const l=Math.hypot(fw,st),vx=(Math.sin(cy)*fw-Math.cos(cy)*st)/l,vz=(Math.cos(cy)*fw+Math.sin(cy)*st)/l,v=(mh?4.6:3.2)*dt*wf(me.x,me.z);{const q=colRes(clamp(me.x+vx*v),clamp(me.z+vz*v),.4);me.x=q[0];me.z=q[1]}me.r=fp?cy:Math.atan2(vx,vz)}else if(fp)me.r=cy}
+function frame(){requestAnimationFrame(frame);const dt=Math.min(.1,clock.getDelta());wAnim(dt);
+if(S){const ms=new Set((S.M||[]).map(q=>q[0]+'_'+q[1]));S.P.forEach(p=>{const id=p[0];swHear(p);let m=pm[id];if(!m){m=pm[id]=mk(p[7],id==S.hu);sc.add(m);m.position.set(p[1],0,p[2])}
+m.visible=!!p[4];{const spn=p[11]>0,ox=m.position.x,oz=m.position.z;id==me.id?upd(m,me.x,me.z,me.r,dt,spn):upd(m,p[1],p[2],p[3],dt,spn);const hh=m.userData.h;if(hh){const m2=id==me.id,u=m2?(swT>0?1-swT/.4:-1):(p[13]>0?1-p[13]/.4:-1);const ud=m.userData,dd=Math.hypot(m.position.x-ox,m.position.z-oz),v=dd>1?0:Math.min(1,dd/Math.max(dt,.001)/4);ud.w=(ud.w||0)+(v-(ud.w||0))*Math.min(1,dt*10);ud.ph=(ud.ph||0)+ud.w*dt*11;hdUpd(hh,IH[m2?slot:p[12]],u,ud.w,ud.ph)}}m.userData.f.visible=p[5]>0;m.userData.s.visible=p[10]>0;m.userData.k.visible=ms.has('0_'+id);m.rotation.z=p[9]>0?.5:0});
 S.A.forEach((a,i)=>{let m=am[i];if(!m){m=am[i]=mk(a[3]);sc.add(m);m.position.set(a[0],0,a[1])}upd(m,a[0],a[1],a[2],dt);m.rotation.z=a[4]?.5:0;m.userData.s.visible=a[5]>0;m.userData.k.visible=ms.has('1_'+i)});
 if(keys.KeyQ)cy+=dt*2;if(keys.KeyE)cy-=dt*2;move(dt);pt+=dt;if(pt>.066){pt=0;if(!isHost)send(hdc,{t:'p',x:+me.x.toFixed(2),z:+me.z.toFixed(2),r:+me.r.toFixed(2),s:slot,q:zm>.5?(zt?[zt.k,zt.i]:1):0})}}
 if(keys.KeyM&&S&&S.hu!=me.id&&(S.ph=='play'||S.ph=='hide')&&performance.now()>lmT){lmT=performance.now()+250;isHost?hmoo(0,1):send(hdc,{t:'moo',l:1})}if(ana){ana.getByteTimeDomainData(buf);let s=0;for(const v of buf){const d=(v-128)/128;s+=d*d}const r=Math.sqrt(s/buf.length);$('mv').style.width=Math.min(100,r*300)+'%';if(mst&&cfgV){if(r>+$('th').value*.6)vho=performance.now()+500;mst.getAudioTracks()[0].enabled=performance.now()<vho||!!keys.KeyM||!!(S&&S.hu==me.id)}if(r>+$('th').value*(keys.KeyM?.3:1)){const k=Math.round(AC.sampleRate/11025),f=[];for(let i=0;i+k<=512;i+=k){let q=0;for(let j=0;j<k;j++)q+=(buf[i+j]-128)/128;f.push(q/k)}const z=zc(f,AC.sampleRate/k);if(z)zr=zr?zr*.7+z*.3:z;if(++lc>3)doMoo()}else{lc=0;zr=0}}
 const e2=S&&S.P.find(p=>p[0]==me.id),sp=!!(e2&&!e2[4]&&S.ph!='over');let cx=me.x,cz=me.z;
 if(sp){const l=S.P.filter(p=>p[4]&&p[0]!=me.id);if(l.length){if(!l.some(p=>p[0]==spT))spT=l[0][0];const m=pm[spT];if(m){cx=m.position.x;cz=m.position.z}}}
 const tid=sp?spT:me.id,tm=pm[tid];hl=!!S&&S.hu==tid;lx=cx;lz=cz;if(fp&&tm)tm.visible=false;for(const k in VG){const e=S&&S.P.find(p=>p[0]==k);VG[k].gain.value=!S?1:e?aud(e[1],e[2],0,+k):0}
-ring.position.x=cx;ring.position.z=cz;ring.visible=!!S&&!fp&&!sp;$('xh').hidden=!(S&&fp);
-swT=Math.max(0,swT-dt);vg.visible=!!S&&S.hu==me.id&&!sp&&fp&&zm<.4;if(vg.visible)hdUpd(vh,IH[slot],swT>0?1-swT/.4:-1,1);
+ring.position.x=cx;ring.position.z=cz;ring.position.y=gy(cx,cz)+.05;ring.visible=!!S&&!fp&&!sp;$('xh').hidden=!(S&&fp);
+swT=Math.max(0,swT-dt);vg.visible=!!S&&S.hu==me.id&&!sp&&fp&&zm<.4;{const dd=Math.hypot(me.x-FW.x,me.z-FW.z),v=dd>1?0:Math.min(1,dd/Math.max(dt,.001)/4.2);FW.x=me.x;FW.z=me.z;FW.w+=(v-FW.w)*Math.min(1,dt*10);FW.ph+=FW.w*dt*11}if(vg.visible)fpUpd(IH[slot],swT>0?1-swT/.4:-1,performance.now()/1000,FW.w,FW.ph);
 {const k=1-Math.exp(-dt*22);cys+=Math.atan2(Math.sin(cy-cys),Math.cos(cy-cys))*k;cps+=(cp-cps)*k;
 const hz=!!S&&S.hu==me.id&&!sp&&IH[slot]=='scope';zm+=((hz&&(scopeOn||keys.KeyZ||keys.ShiftLeft)?1:0)-zm)*(1-Math.exp(-dt*8));cam.fov=55-zm*(55-zf());cam.updateProjectionMatrix();$('zv').hidden=zm<.15;$('xh').hidden=!(S&&(fp||zm>.4));
 zt=null;if(hz){let bl=1.1;const tt=(k,i,x,z)=>{const dx=x-cx,dz=z-cz,d=Math.hypot(dx,dz),a=Math.atan2(dx,dz)-cys,q=Math.abs(Math.atan2(Math.sin(a),Math.cos(a)));if(d<1||d>70||q>1.2)return;const l=Math.sin(q)*d;if(l<bl){bl=l;zt={k,i,x,z}}};S.P.forEach(p=>p[4]&&p[0]!=me.id&&tt(0,p[0],p[1],p[2]));S.A.forEach((a,i)=>tt(1,i,a[0],a[1]))}}
-{const tg=zm>.5&&zt?(zt.k?am[zt.i]:pm[zt.i]):null;if(tg!==hlm){hlm&&tint(hlm,0);tg&&tint(tg,0x7a24d6);hlm=tg}pring.visible=!!tg;tg&&pring.position.set(tg.position.x,.06,tg.position.z)}
-const F=fp||zm>.4;if(F){cam.position.set(cx,1.7,cz);cam.lookAt(cx+Math.sin(cys)*Math.cos(cps),1.7+Math.sin(cps),cz+Math.cos(cys)*Math.cos(cps))}
-else{const el=Math.max(.05,Math.min(1.25,.45-cps)),D=8;cam.position.set(cx-Math.sin(cys)*Math.cos(el)*D,1.3+Math.sin(el)*D,cz-Math.cos(cys)*Math.cos(el)*D);cam.lookAt(cx,1.2,cz)}
-rd.render(sc,cam)}
-function rs(){rd.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}
+{const tg=zm>.5&&zt?(zt.k?am[zt.i]:pm[zt.i]):null;if(tg!==hlm){hlm&&tint(hlm,0);tg&&tint(tg,0x7a24d6);hlm=tg}pring.visible=!!tg;tg&&pring.position.set(tg.position.x,tg.position.y+.06,tg.position.z)}
+const F=fp||zm>.4;if(F){const gh=gy(cx,cz);cam.position.set(cx,gh+1.7,cz);cam.lookAt(cx+Math.sin(cys)*Math.cos(cps),gh+1.7+Math.sin(cps),cz+Math.cos(cys)*Math.cos(cps))}
+else{const el=Math.max(.05,Math.min(1.25,.45-cps)),D=8;const gh=gy(cx,cz);cam.position.set(cx-Math.sin(cys)*Math.cos(el)*D,gh+1.3+Math.sin(el)*D,cz-Math.cos(cys)*Math.cos(el)*D);cam.lookAt(cx,gh+1.2,cz)}
+rd.clear();rd.render(sc,cam);if(vg.visible){rd.clearDepth();rd.render(vsc,vcam)}}
+function rs(){rd.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();vcam.aspect=innerWidth/innerHeight;vcam.updateProjectionMatrix()}
 addEventListener('resize',rs);rs();cam.position.set(0,15,-13);
 addEventListener('keydown',e=>{if(/INPUT|TEXTAREA/.test(e.target.tagName)&&e.target.type!='range')return;keys[e.code]=1;if(e.code=='Space'){e.preventDefault();useItem()}if(/^Digit[1-5]$/.test(e.code))selSlot(+e.code[5]-1);if(e.code=='KeyM'&&!ana)doMoo(1);if(e.code=='KeyV')fp=!fp;if(e.code=='Tab'){e.preventDefault();const l=S?S.P.filter(p=>p[4]&&p[0]!=me.id):[];if(l.length)spT=l[(l.findIndex(p=>p[0]==spT)+1)%l.length][0]}});
 addEventListener('keyup',e=>keys[e.code]=0);cv.oncontextmenu=e=>e.preventDefault();addEventListener('mousedown',e=>{if(e.button==2)markIt()});cv.onpointerdown=e=>{if(e.button==2)return;if(document.pointerLockElement!=cv&&cv.requestPointerLock){cv.requestPointerLock();return}useItem()};
-addEventListener('mousemove',e=>{if(document.pointerLockElement==cv){const q=.0025*cam.fov/55;cy-=e.movementX*q;cp=Math.max(-1.4,Math.min(1.4,cp-e.movementY*q))}});addEventListener('wheel',e=>{if(S&&S.hu==me.id&&IH[slot]=='scope'&&(scopeOn||keys.KeyZ||keys.ShiftLeft)){e.preventDefault();zw=Math.max(0,Math.min(1,zw-e.deltaY*.0015));toast('🔭 Nagyítás ×'+(55/zf()).toFixed(1))}},{passive:false});frame();
-function fromLink(){const q=(location.hash.slice(1)||new URLSearchParams(location.search).get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(q.length>=4){$('oc').value=q;$('jp').hidden=false;$('bg').textContent='Csatlakozás a(z) '+q+' szobához'}}
+addEventListener('mousemove',e=>{if(document.pointerLockElement==cv){const q=.0025*cam.fov/55;cy-=e.movementX*q;cp=Math.max(-1.4,Math.min(1.4,cp-e.movementY*q))}});addEventListener('wheel',e=>{if(S&&S.hu==me.id&&IH[slot]=='scope'&&(scopeOn||keys.KeyZ||keys.ShiftLeft)){e.preventDefault();zw=Math.max(0,Math.min(1,zw-e.deltaY*.0015));toast('🔭 Zoom ×'+(55/zf()).toFixed(1))}},{passive:false});frame();
+function fromLink(){const q=(location.hash.slice(1)||new URLSearchParams(location.search).get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(q.length>=4){$('oc').value=q;$('jp').hidden=false;$('bg').textContent='Join room '+q}}
 </script></body></html>
