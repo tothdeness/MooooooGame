@@ -10,6 +10,9 @@
 body{font:15px system-ui,sans-serif;background:var(--bg);color:var(--fg);overflow:hidden}
 canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 [hidden]{display:none!important}
+#menu.inv #bh,#menu.inv #bhm,#menu.inv #bj,#menu.inv #oc,#menu.inv #jp>small{display:none}
+#iv{background:var(--ac);color:#fff;padding:12px;border-radius:10px;text-align:center;font-size:16px}#iv b{letter-spacing:3px}#iv small{cursor:pointer;text-decoration:underline}
+#menu.inv #bg{font-size:18px;padding:14px}
 .scr{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;background:#0003;overflow:auto}
 .p{background:var(--pn);border:1px solid var(--bd);border-radius:16px;padding:18px;max-width:440px;width:100%;display:flex;flex-direction:column;gap:10px;margin:auto}
 h1,h2,p{margin:0}p,small{opacity:.8;font-size:13px}
@@ -38,6 +41,7 @@ button{background:var(--ac);color:#fff;border:0;cursor:pointer;font-weight:600}b
 <div id="menu" class="scr"><div class="p">
 <h1>🐄 Moo Hunt 3D</h1>
 <p>Hide among the AI animals! Imitate your animal's sound into the microphone – if you stay silent for 10–20 seconds, your animal spins around 5 times and gives you away. As the hunter, find the real players – but catching an AI animal is penalized.</p>
+<div id="iv" hidden>🎉 You're invited to room <b id="ivc"></b><br><small id="ivx">Not you? Create your own room instead</small></div>
 <input id="nm" placeholder="Your name" maxlength="12">
 <p>🎲 Every round you become a random, different animal – you have to imitate your animal's sound.</p><div id="an" hidden></div>
 <small>🎙 Live voice chat is always on (in server rooms and manual-code rooms alike).</small>
@@ -118,14 +122,14 @@ $('an').innerHTML=Object.keys(AN).map(k=>`<button class="ab${k=='cow'?' on':''}"
 $('an').onclick=e=>{const b=e.target.closest('button');if(!b)return;me.an=b.dataset.k;document.querySelectorAll('.ab').forEach(x=>x.classList.toggle('on',x==b))};
 let cu=null,sgo=0;const dgs=[];function dgl(m){dgs.push(new Date().toLocaleTimeString()+' '+m);if(dgs.length>9)dgs.shift();const d=$('dg');d.hidden=false;d.textContent='Connection log (click to close)\n'+dgs.join('\n')}
 function dgc(c,w){try{const pc=c.peerConnection;if(!pc)return;pc.addEventListener('icecandidate',e=>{if(e.candidate){const t=/ typ (\w+)/.exec(e.candidate.candidate);dgl(w+' ICE candidate: '+(t?t[1]:'?'))}else dgl(w+' ICE gathering done')});pc.addEventListener('iceconnectionstatechange',()=>{dgl(w+' ICE state: '+pc.iceConnectionState);if(pc.iceConnectionState=='failed')toast('The direct connection could not be established (network/NAT) – you need a TURN server (Advanced) or another network.')})}catch(e){}}
-const prep=()=>{me.name=($('nm').value.trim()||'Player'+(10+R()*89|0)).slice(0,12);sgo=0;const t=$('tu').value.trim();try{localStorage.setItem('muuTurn',t)}catch(e){}ICE.iceServers=ICE.iceServers.filter(x=>x!==cu);cu=null;if(t){const[u,n,c]=t.split('|');if(u){cu={urls:u.split(';').map(q=>q.trim()),username:n,credential:c};ICE.iceServers.push(cu)}}};
+const prep=()=>{me.name=($('nm').value.trim()||'Player'+(10+R()*89|0)).slice(0,12);try{localStorage.setItem('muuName',$('nm').value.trim())}catch(e){}sgo=0;const t=$('tu').value.trim();try{localStorage.setItem('muuTurn',t)}catch(e){}ICE.iceServers=ICE.iceServers.filter(x=>x!==cu);cu=null;if(t){const[u,n,c]=t.split('|');if(u){cu={urls:u.split(';').map(q=>q.trim()),username:n,credential:c};ICE.iceServers.push(cu)}}};
 try{$('tu').value=localStorage.getItem('muuTurn')||''}catch(e){}
 function rl(){$('pl').innerHTML=L.map(p=>`<div>🎲 ${esc(p.name)}${p.id==0?' 👑':''} <small>🎙 ${p.v||0}/4</small></div>`).join('');$('hc').hidden=!isHost;$('bs').disabled=L.length<2;$('cnt').textContent=L.length+'/8';$('mds').hidden=!isHost;$('mds').value=MODE;$('mdt').textContent=MODE=='lim'?'🗡 The hunter will have '+L.length+' swings (as many as there are players).':'♾ Unlimited swings.';vcSync()}
 let pe,mst,vho=0,hlm=null;const vcC={},VG={},OP=s=>s.replace('useinbandfec=1','useinbandfec=1;stereo=0;maxaveragebitrate=64000');
 const wrap=c=>{const w={get readyState(){return c.open?'open':'connecting'},send:s=>c.send(s),onopen:0,onmessage:0,onclose:0};c.on('open',()=>w.onopen&&w.onopen());c.on('data',d=>w.onmessage&&w.onmessage({data:d}));c.on('close',()=>w.onclose&&w.onclose());c.on('error',()=>w.onclose&&w.onclose());return w};
 function mkRoom(){const code=Array.from({length:5},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[R()*32|0]).join('');pe=new Peer('muu-'+code,{config:ICE});
 pe.on('error',e=>{dgl('Error: '+e.type+' '+(e.message||''));if(e.type=='unavailable-id')mkRoom();else{$('bh').disabled=false;toast(/network|socket|server/.test(e.type)?'The matchmaking server is unreachable – check your internet connection':'Network error: '+e.type)}});pe.on('disconnected',()=>pe.reconnect());pe.on('connection',c=>{dgl('Incoming connection');dgc(c,'Guest');hdcSetup(wrap(c))});pe.on('call',vcAns);
-pe.on('open',()=>{dgl('Matchmaking server OK, room: '+pe.id);L[0].pid=pe.id;$('rc').textContent=code;$('lk').value=location.href.split(/[?#]/)[0]+'#'+code;sh('fw',location.protocol=='file:');sh('menu',0);sh('lobby',1);rl()})}
+pe.on('open',()=>{dgl('Matchmaking server OK, room: '+pe.id);L[0].pid=pe.id;$('rc').textContent=code;$('lk').value=location.href.split(/[?#]/)[0]+'?room='+code;sh('fw',location.protocol=='file:');sh('menu',0);sh('lobby',1);rl()})}
 $('bh').onclick=async()=>{prep();await startMic();cfgV=1;isHost=true;me.id=0;L=[{id:0,name:me.name,an:me.an}];$('bh').disabled=true;mkRoom();startTick()};
 const startTick=()=>{try{const w=new Worker(URL.createObjectURL(new Blob(['setInterval(()=>postMessage(0),50)'])));w.onmessage=tick}catch(e){setInterval(tick,50)}};
 $('bhm').onclick=async()=>{prep();await startMic();cfgV=1;isHost=true;me.id=0;L=[{id:0,name:me.name,an:me.an}];sh('menu',0);sh('lobby',1);sh('kl',0);$('kd').open=true;rl();startTick()};
@@ -408,5 +412,8 @@ addEventListener('resize',rs);rs();cam.position.set(0,15,-13);
 addEventListener('keydown',e=>{if(/INPUT|TEXTAREA/.test(e.target.tagName)&&e.target.type!='range')return;keys[e.code]=1;if(e.code=='Space'){e.preventDefault();useItem()}if(/^Digit[1-5]$/.test(e.code))selSlot(+e.code[5]-1);if(e.code=='KeyM'&&!ana)doMoo(1);if(e.code=='KeyV')fp=!fp;if(e.code=='Tab'){e.preventDefault();const l=S?S.P.filter(p=>p[4]&&p[0]!=me.id):[];if(l.length)spT=l[(l.findIndex(p=>p[0]==spT)+1)%l.length][0]}});
 addEventListener('keyup',e=>keys[e.code]=0);cv.oncontextmenu=e=>e.preventDefault();addEventListener('mousedown',e=>{if(e.button==2)markIt()});cv.onpointerdown=e=>{if(e.button==2)return;if(document.pointerLockElement!=cv&&cv.requestPointerLock){cv.requestPointerLock();return}useItem()};
 addEventListener('mousemove',e=>{if(document.pointerLockElement==cv){const q=.0025*cam.fov/55;cy-=e.movementX*q;cp=Math.max(-1.4,Math.min(1.4,cp-e.movementY*q))}});addEventListener('wheel',e=>{if(S&&S.hu==me.id&&IH[slot]=='scope'&&(scopeOn||keys.KeyZ||keys.ShiftLeft)){e.preventDefault();zw=Math.max(0,Math.min(1,zw-e.deltaY*.0015));toast('🔭 Zoom ×'+(55/zf()).toFixed(1))}},{passive:false});frame();
-function fromLink(){const q=(location.hash.slice(1)||new URLSearchParams(location.search).get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(q.length>=4){$('oc').value=q;$('jp').hidden=false;$('bg').textContent='Join room '+q}}
+function fromLink(){const q=(new URLSearchParams(location.search).get('room')||location.hash.slice(1)||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(q.length<4)return;$('oc').value=q;$('jp').hidden=false;$('menu').classList.add('inv');sh('iv',1);$('ivc').textContent=q;$('bg').textContent='▶ Join room '+q;setTimeout(()=>{try{$('nm').focus()}catch(e){}},50)}
+$('ivx').onclick=()=>{$('menu').classList.remove('inv');sh('iv',0);$('jp').hidden=true;$('oc').value='';$('bg').textContent='Join';try{history.replaceState(null,'',location.pathname)}catch(e){}};
+$('nm').onkeydown=e=>{if(e.key=='Enter'&&$('menu').classList.contains('inv'))$('bg').click()};
+try{$('nm').value=localStorage.getItem('muuName')||''}catch(e){}
 </script></body></html>
