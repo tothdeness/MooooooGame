@@ -165,6 +165,11 @@ let MODE='lim';const HR=22;let me={id:0,name:'',an:'cow',x:0,z:0,r:0},isHost=fal
 const send=(d,m)=>d&&d.readyState=='open'&&d.send(JSON.stringify(m)),bc=m=>{const s=JSON.stringify(m);for(const d of Object.values(peers))d.readyState=='open'&&d.send(s)};
 const clamp=v=>Math.max(-31,Math.min(31,v));
 const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'},{urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'}]};
+/* Optional own TURN relay: helps when two players cannot connect directly (different networks, mobile data, strict NAT).
+   Fill it in once and everyone who uses this file gets it automatically - nothing to type in the menu.
+   Example: const MY_TURN={urls:['turn:YOUR-SERVER:80','turn:YOUR-SERVER:443?transport=tcp'],username:'USER',credential:'PASSWORD'}; */
+const MY_TURN={urls:[],username:'',credential:''};
+if(MY_TURN.urls.length)ICE.iceServers.push({urls:[].concat(MY_TURN.urls),username:MY_TURN.username,credential:MY_TURN.credential});
 function toast(m){const t=$('ts');t.textContent=m;t.hidden=false;clearTimeout(tT);tT=setTimeout(()=>t.hidden=true,3200)}
 /* ---------- audio ---------- */
 const ctx=()=>{AC=AC||new(window.AudioContext||window.webkitAudioContext)();AC.resume();return AC};
