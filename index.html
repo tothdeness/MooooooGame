@@ -11,7 +11,7 @@ body{font:15px system-ui,sans-serif;background:var(--bg);color:var(--fg);overflo
 canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 [hidden]{display:none!important}
 #menu.inv #bh,#menu.inv #bhm,#menu.inv #bj,#menu.inv #oc,#menu.inv #jp>small{display:none}
-#iv{background:var(--ac);color:#fff;padding:12px;border-radius:10px;text-align:center;font-size:16px}#iv b{letter-spacing:3px}#iv small{cursor:pointer;text-decoration:underline}
+#iv{font-size:13px;opacity:.85}#iv b{letter-spacing:2px}#iv small{cursor:pointer;text-decoration:underline}
 #menu.inv #bg{font-size:18px;padding:14px}
 .scr{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;background:#0003;overflow:auto}
 .p{background:var(--pn);border:1px solid var(--bd);border-radius:16px;padding:18px;max-width:440px;width:100%;display:flex;flex-direction:column;gap:10px;margin:auto}
@@ -41,7 +41,7 @@ button{background:var(--ac);color:#fff;border:0;cursor:pointer;font-weight:600}b
 <div id="menu" class="scr"><div class="p">
 <h1>🐄 Moo Hunt 3D</h1>
 <p>Hide among the AI animals! Imitate your animal's sound into the microphone – if you stay silent for 10–20 seconds, your animal spins around 5 times and gives you away. As the hunter, find the real players – but catching an AI animal is penalized.</p>
-<div id="iv" hidden>🎉 You're invited to room <b id="ivc"></b><br><small id="ivx">Not you? Create your own room instead</small></div>
+<div id="iv" hidden>You're invited to room <b id="ivc"></b> · <small id="ivx">create your own room instead</small></div>
 <input id="nm" placeholder="Your name" maxlength="12">
 <p>🎲 Every round you become a random, different animal – you have to imitate your animal's sound.</p><div id="an" hidden></div>
 <small>🎙 Live voice chat is always on (in server rooms and manual-code rooms alike).</small>
